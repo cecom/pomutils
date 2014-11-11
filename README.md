@@ -11,7 +11,7 @@ Here you find a library which solves this problem, imo, in the right way ;-). It
 Installation
 ------------
 
-Download the jar file or create it with `mvn clean install` and execute it with java >1.6.
+Download the [jar](https://github.com/cecom/pomutils/releases/latest) file or create it with `mvn clean install` and execute it with java >1.6.
 It's a shaded jar, which contains all necessary dependencies.
 
 For usage, call: `java -jar pomutils-X.X.jar --help`
