@@ -1,0 +1,4 @@
+--- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
+    strategy: THEIR
+
+

@@ -2,13 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-     <groupId>blub</groupId>
-	 <artifactId>bla</artifactId>
+     <groupId>de.oppermann.pomutils</groupId>
+	 <artifactId>bom</artifactId>
 	 <version>0.1</version>
   </parent>
 
-  <artifactId>pommergedriver</artifactId>
-  <groupId>de.oppermann.git.pommergedriver</groupId>
+  <groupId>de.oppermann.pomutils</groupId>
+  <artifactId>pomutils</artifactId>
   <version>0.1</version>
   <dependencies>
   	<dependency>

@@ -41,7 +41,7 @@ public class VersionReplaceTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
+		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
 
 		File testTargetResourceFolder = new File("target/testresources/versionReplacer");
 		FileUtils.deleteDirectory(testTargetResourceFolder);
@@ -56,26 +56,35 @@ public class VersionReplaceTest extends TestCase {
 	}
 
 	public void testParentAndProjectVersionChange() throws Exception {
+		String myTestSubFolder = "versionReplacer/parent.and.project.version";
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
 		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion("target/testresources/versionReplacer/parent.and.project.version.xml", newVersion);
+		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
 
 		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentVersion()));
 		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectVersion()));
 	}
 
 	public void testParentVersionChange() throws Exception {
+		String myTestSubFolder = "versionReplacer/parent.version";
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
 		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion("target/testresources/versionReplacer/parent.version.pom.xml", newVersion);
+		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
 
 		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentVersion()));
-		assertNull("project version does not exist", resultPom.getProjectVersion());
+		assertNull("project version exists", resultPom.getProjectVersion());
 	}
 
 	public void testProjectVersionChange() throws Exception {
-		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion("target/testresources/versionReplacer/project.version.pom.xml", newVersion);
+		String myTestSubFolder = "versionReplacer/project.version";
+		TestUtils.prepareTestFolder(myTestSubFolder);
 
-		assertNull("parent version does not exist", resultPom.getParentVersion());
+		String newVersion = "5.0";
+		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
+
+		assertNull("parent version exists", resultPom.getParentVersion());
 		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectVersion()));
 	}
 }

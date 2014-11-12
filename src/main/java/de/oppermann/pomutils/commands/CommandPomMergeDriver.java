@@ -19,9 +19,12 @@ package de.oppermann.pomutils.commands;
  * under the License.
  */
 
+import java.io.File;
+
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
+import de.oppermann.pomutils.rules.Ruleset;
 import de.oppermann.pomutils.select.SelectionStrategy;
 
 /**
@@ -45,6 +48,9 @@ public class CommandPomMergeDriver {
 	@Parameter(names = { "-s", "--select" }, description = "Which version to select to resolve conflicts.  'our', 'their', or 'prompt'.  If 'prompt' is specified, then you will be prompted via stdout/stdin to select a version.", required = false, converter = SelectionStrategyConverter.class)
 	private SelectionStrategy selectionStrategy = SelectionStrategy.OUR;
 
+	@Parameter(names = { "-r", "--ruleset" }, description = "The ruleset to use when you merge poms. If not given only parent/project version is evaluated.")
+	private File ruleSetfile;
+
 	public String getBasePom() {
 		return basePom;
 	}
@@ -56,9 +62,20 @@ public class CommandPomMergeDriver {
 	public String getTheirPom() {
 		return theirPom;
 	}
-	
+
 	public SelectionStrategy getSelectionStrategy() {
 		return selectionStrategy;
 	}
-	
+
+	public File getRuleSetFile() {
+		return ruleSetfile;
+	}
+
+	public Ruleset getRuleSet() {
+		if (getRuleSetFile() == null) {
+			return new Ruleset(getSelectionStrategy());
+		}
+		return new Ruleset(getRuleSetFile());
+	}
+
 }

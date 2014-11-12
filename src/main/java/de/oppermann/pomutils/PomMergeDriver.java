@@ -21,8 +21,6 @@ package de.oppermann.pomutils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -30,9 +28,9 @@ import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.oppermann.pomutils.select.VersionSelector;
+import de.oppermann.pomutils.rules.Rule;
+import de.oppermann.pomutils.rules.Ruleset;
 import de.oppermann.pomutils.util.POM;
-import de.oppermann.pomutils.util.VersionFieldType;
 
 /**
  * 
@@ -43,99 +41,44 @@ import de.oppermann.pomutils.util.VersionFieldType;
 public class PomMergeDriver {
 
 	private final Logger logger = LoggerFactory.getLogger(PomMergeDriver.class);
-	
+
+	private Ruleset ruleset;
 	private final String basePomFile;
 	private final String ourPomFile;
 	private final String theirPomFile;
-	
-	/**
-	 * The version selector to use resolve version conflicts.
-	 */
-	private final VersionSelector versionSelector;
 
-	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, VersionSelector versionSelector) {
+	public PomMergeDriver(Ruleset ruleset, String basePomFile, String ourPomFile, String theirPomFile) {
+		this.ruleset = ruleset;
 		this.basePomFile = basePomFile;
 		this.ourPomFile = ourPomFile;
 		this.theirPomFile = theirPomFile;
-		this.versionSelector = versionSelector;
 	}
 
 	public int merge() {
-		
 		try {
 			POM basePom = new POM(basePomFile);
-			POM ourPom = new POM(ourPomFile);;
+			POM ourPom = new POM(ourPomFile);
 			POM theirPom = new POM(theirPomFile);
-			
-			List<POM> adjustedPoms = new ArrayList<POM>();
-			
-			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PROJECT));
-			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PARENT));
-			
-			for (POM adjustedPom : adjustedPoms) {
-				adjustedPom.savePom();
+
+			for (Rule rule : ruleset.getRules()) {
+				rule.evaluate(basePom, ourPom, theirPom);
 			}
+
+			basePom.savePom();
+			theirPom.savePom();
+			ourPom.savePom();
 		} catch (IOException e) {
 			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
 		} catch (XMLStreamException e) {
 			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
 		}
-		
+
 		return doGitMerge();
-	}
-
-	private void addIfNotNull(List<POM> adjustedPoms, POM adjustedPom) {
-		if (adjustedPom != null) {
-			adjustedPoms.add(adjustedPom);
-		}
-	}
-
-	private POM adjustVersion(POM basePom, POM ourPom, POM theirPom, VersionFieldType versionFieldType) {
-		String baseVersion = versionFieldType.get(basePom);
-		String ourVersion = versionFieldType.get(ourPom);
-		String theirVersion = versionFieldType.get(theirPom);
-		if (baseVersion != null && ourVersion != null && theirVersion != null && !ourVersion.equals(theirVersion)) {
-			String newVersion;
-			if (baseVersion.equals(ourVersion)) {
-				/*
-				 * Our version hasn't changed, so no conflict.  Just use theirVersion.
-				 */
-				newVersion = theirVersion;
-			} else if (baseVersion.equals(theirVersion)) {
-				/*
-				 * Their version hasn't changed, so no conflict.  Just use ourVersion.
-				 */
-				newVersion = ourVersion;
-			} else {
-				/*
-				 * Both our version and their version have changed from the base, so conflict.
-				 */
-				newVersion = versionSelector.selectVersion(
-						ourPom.getProjectIdentifier(),
-						versionFieldType,
-						ourVersion,
-						theirVersion);
-			}
-					
-			if (newVersion != null) {
-				/*
-				 * newVersion can be null if the user wants to skip resolution.
-				 */
-						
-				POM pomToAdjust = newVersion.equals(ourVersion)
-						? theirPom
-						: ourPom;
-				
-				versionFieldType.set(pomToAdjust, newVersion);
-				return pomToAdjust;
-			}
-		}
-		return null;
 	}
 
 	private int doGitMerge() {
 		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L", "theirs",
-				ourPomFile, basePomFile, theirPomFile);
+		        ourPomFile, basePomFile, theirPomFile);
 		processBuilder.redirectErrorStream(true);
 		try {
 			final Process p = processBuilder.start();
@@ -151,9 +94,9 @@ public class PomMergeDriver {
 	}
 
 	private void consumeGitOutput(final Process p) throws IOException {
-		
+
 		String output = IOUtil.toString(new BufferedInputStream(p.getInputStream(), 256));
-		
+
 		logger.debug("Git merge output:\n{}", output);
 	}
 

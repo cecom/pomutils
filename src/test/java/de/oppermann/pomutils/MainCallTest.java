@@ -19,11 +19,7 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
-import java.io.File;
-
 import junit.framework.TestCase;
-
-import org.apache.commons.io.FileUtils;
 
 /**
  * 
@@ -33,31 +29,42 @@ import org.apache.commons.io.FileUtils;
 
 public class MainCallTest extends TestCase {
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	public void testMergeCommandWithoutRuleset() throws Exception {
+		String myTestSubFolder = "mainCall/withoutRuleset";
 
-		File targetDirectory = new File("target/testresources/mainCall");
-		FileUtils.deleteDirectory(targetDirectory);
-		FileUtils.copyDirectory(new File("src/test/resources/mainCall"), targetDirectory);
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String[] args = {
+		        "merge"
+		        , "--our=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml"
+		        , "--base=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml"
+		        , "--their=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml" };
+
+		assertEquals(0, Main.mainInternal(args));
 	}
 
-	public void testMergeCommand() throws Exception {
+	public void testMergeCommandWithRuleset() throws Exception {
+		String myTestSubFolder = "mainCall/withRuleset";
+
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
 		String[] args = {
-		        "--debug"
-		        , "merge"
-		        , "--our=target/testresources/mainCall/our.pom.xml"
-		        , "--base=target/testresources/mainCall/base.pom.xml"
-		        , "--their=target/testresources/mainCall/their.pom.xml" };
+		        "merge"
+		        , "--ruleset=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/ruleset.yaml"
+		        , "--our=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml"
+		        , "--base=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml"
+		        , "--their=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml" };
 
 		assertEquals(0, Main.mainInternal(args));
 	}
 
 	public void testReplaceCommand() throws Exception {
+		String myTestSubFolder = "mainCall/versionReplace";
+
+		TestUtils.prepareTestFolder(myTestSubFolder);
 		String[] args = {
-		        "--debug"
-		        , "replace"
-		        , "--pom=target/testresources/mainCall/replace.pom.xml"
+		        "replace"
+		        , "--pom=" + TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/replace.pom.xml"
 		        , "--version=\"5.0\"" };
 
 		assertEquals(0, Main.mainInternal(args));

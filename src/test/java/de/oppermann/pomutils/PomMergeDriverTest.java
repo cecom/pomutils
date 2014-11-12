@@ -29,8 +29,8 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 
 import com.ctc.wstx.stax.WstxInputFactory;
 
+import de.oppermann.pomutils.rules.Ruleset;
 import de.oppermann.pomutils.select.SelectionStrategy;
-import de.oppermann.pomutils.select.TheirVersionSelector;
 import de.oppermann.pomutils.util.POM;
 
 /**
@@ -44,138 +44,169 @@ public class PomMergeDriverTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-
-		File testTargetResourceFolder = new File("target/testresources/merge");
-		FileUtils.deleteDirectory(testTargetResourceFolder);
-		FileUtils.copyDirectory(new File("src/test/resources/merge"), testTargetResourceFolder);
+		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
 	}
 
 	public void testAutoMergeSucceded() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeSucceded/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeSucceded/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeSucceded/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeSucceded";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR.getSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.OUR);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		
+
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("our", ourPom.getProjectVersion());
 		assertEquals("our", theirPom.getProjectVersion());
-		
+
 		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
 		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
-		
+
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeSucceded_their() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeSucceded_their/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeSucceded_their/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeSucceded_their/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeSucceded_their";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.THEIR.getSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.THEIR);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		
+
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("their", ourPom.getProjectVersion());
 		assertEquals("their", theirPom.getProjectVersion());
-		
+
 		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
 		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
-		
+
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeSucceded_noConflict_our() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeSucceded_noConflict_our";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.PROMPT.getSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.PROMPT);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		
+
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("our", ourPom.getProjectVersion());
 		assertEquals("our", theirPom.getProjectVersion());
-		
+
 		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
 		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
-		
+
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeSucceded_noConflict_their() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeSucceded_noConflict_their";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.PROMPT.getSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.PROMPT);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		
+
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("their", ourPom.getProjectVersion());
 		assertEquals("their", theirPom.getProjectVersion());
-		
+
 		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
 		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
-		
+
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeSucceded_prompt() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeSucceded_prompt/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeSucceded_prompt/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeSucceded_prompt/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeSucceded_prompt";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, new TheirVersionSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.THEIR);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("their", ourPom.getParentVersion());
 		assertEquals("their", theirPom.getParentVersion());
-		
+
 		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
 		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
-		
+
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeFailed() throws Exception {
-		String basePomFile = "target/testresources/merge/autoMergeFailed/base.pom.xml";
-		String ourPomFile = "target/testresources/merge/autoMergeFailed/our.pom.xml";
-		String theirPomFile = "target/testresources/merge/autoMergeFailed/their.pom.xml";
+		String myTestSubFolder = "merge/autoMergeFailed";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR.getSelector());
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.OUR);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge conflict", mergeReturnValue == 1);
 
 		POM theirPom = new POM(theirPomFile);
-		
+
 		StringBuilder ourPomString = new StringBuilder(FileUtils.readFileToString(new File(ourPomFile)));
 		String ourProjectVersion = PomHelper.getProjectVersion(new ModifiedPomXMLEventReader(ourPomString, new WstxInputFactory()));
-		
+
 		assertEquals("same version now", ourProjectVersion, theirPom.getProjectVersion());
 	}
 }
