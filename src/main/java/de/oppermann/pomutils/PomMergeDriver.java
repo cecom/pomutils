@@ -55,7 +55,7 @@ public class PomMergeDriver {
 	}
 
 	public int doGitMerge() {
-		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-p", "-L", "our", "-L", "base", "-L", "theirs", ourPom.getPath(),
+		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "our", "-L", "base", "-L", "theirs", ourPom.getPath(),
 		        basePom.getPath(), theirPom.getPath());
 		processBuilder.redirectErrorStream(true);
 		try {
