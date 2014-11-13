@@ -21,12 +21,15 @@ package de.oppermann.pomutils.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.model.Model;
+import org.apache.maven.model.Profile;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
@@ -39,6 +42,8 @@ import com.ctc.wstx.stax.WstxInputFactory;
 /**
  * 
  * @author Sven Oppermann <sven.oppermann@gmail.com>
+ * 
+ *         this class is a wrapper class to the version-maven-plugin
  * 
  */
 public class POM {
@@ -58,6 +63,7 @@ public class POM {
 	private String projectVersion;
 	private String parentVersion;
 	private String projectIdentifier;
+	private Model rawModel;
 
 	public POM(String pomFileAsString) throws IOException, XMLStreamException {
 		pomFile = new File(pomFileAsString);
@@ -69,7 +75,7 @@ public class POM {
 	}
 
 	private static XMLInputFactory initializeXmlInputFactory()
-			throws FactoryConfigurationError {
+	        throws FactoryConfigurationError {
 		XMLInputFactory inputFactory = new WstxInputFactory();
 		inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
 		return inputFactory;
@@ -78,27 +84,27 @@ public class POM {
 	private void initialize() throws IOException, XMLStreamException {
 		StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
 		pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
-		Model model = PomHelper.getRawModel(pom);
-		projectIdentifier = calculateProjectIdentifier(model);
-		projectVersion = model.getVersion();
-		parentVersion = model.getParent() != null
-				? model.getParent().getVersion()
-				: null;
+		rawModel = PomHelper.getRawModel(pom);
+		projectIdentifier = calculateProjectIdentifier();
+		projectVersion = rawModel.getVersion();
+		parentVersion = rawModel.getParent() != null
+		        ? rawModel.getParent().getVersion()
+		        : null;
 	}
 
-	private String calculateProjectIdentifier(Model model) {
-		String groupId = model.getGroupId();
-		String parentGroupId = model.getParent() != null ? model.getParent().getGroupId() : null;
-		String artifactId = model.getArtifactId();
-		String projectName = model.getName();
-		
+	private String calculateProjectIdentifier() {
+		String groupId = rawModel.getGroupId();
+		String parentGroupId = rawModel.getParent() != null ? rawModel.getParent().getGroupId() : null;
+		String artifactId = rawModel.getArtifactId();
+		String projectName = rawModel.getName();
+
 		StringBuilder identifier = new StringBuilder(64);
-		
+
 		if (projectName != null) {
 			identifier.append(projectName);
 			identifier.append(" (");
 		}
-		
+
 		if (groupId != null) {
 			identifier.append(groupId);
 			identifier.append(":");
@@ -106,15 +112,15 @@ public class POM {
 			identifier.append(parentGroupId);
 			identifier.append(":");
 		}
-		
+
 		if (artifactId != null) {
 			identifier.append(artifactId);
 		}
-		
+
 		if (projectName != null) {
 			identifier.append(")");
 		}
-		
+
 		return identifier.toString();
 	}
 
@@ -133,14 +139,14 @@ public class POM {
 	public String getParentVersion() {
 		return parentVersion;
 	}
-	
+
 	/**
 	 * Gets an identifier that can be used for logging/prompting.
 	 */
 	public String getProjectIdentifier() {
 		return projectIdentifier;
 	}
-	
+
 	/**
 	 * Sets the parent version to the given one, if it exists
 	 * @param newVersion
@@ -165,7 +171,7 @@ public class POM {
 		logger.debug("Adjusting project version from [{}] to [{}] of [{}] for [{}]", this.projectVersion, newVersion, getPath(), this.projectIdentifier);
 		this.projectVersion = newVersion;
 		this.changed = true;
-		
+
 	}
 
 	/**
@@ -175,19 +181,19 @@ public class POM {
 		if (!changed) {
 			return;
 		}
-		
+
 		if (this.projectVersion != null) {
 			changed |= PomHelper.setProjectVersion(pom, this.projectVersion);
 		}
-		
+
 		if (this.parentVersion != null) {
 			changed |= PomHelper.setProjectParentVersion(pom, this.parentVersion);
 		}
-		
+
 		if (!changed) {
 			return;
 		}
-		
+
 		FileUtils.fileWrite(pomFile.getAbsolutePath(), pom.asStringBuilder().toString());
 	}
 
@@ -197,6 +203,72 @@ public class POM {
 	 */
 	public String getPath() {
 		return pomFile.getPath();
+	}
+
+	public String getProfileProperty(String profileId, String property) {
+		Properties properties = getProfileProperties(profileId);
+		return properties.getProperty(property);
+	}
+
+	public Properties getProfileProperties(String profileId) {
+		if (profileId == null) {
+			throw new IllegalArgumentException("profileId is null");
+		}
+		for (Profile profile : getRawModel().getProfiles()) {
+			if (profileId.equals(profile.getId())) {
+				return profile.getProperties();
+			}
+		}
+		throw new IllegalArgumentException("profile [" + profileId + "] not found");
+	}
+
+	public Properties getProperties() {
+		return getRawModel().getProperties();
+	}
+
+	public void setPropertyToValue(String property, String newPropertyValue) throws XMLStreamException, IOException {
+		setPropertyToValue(null, property, newPropertyValue);
+	}
+
+	public void setPropertyToValue(String profileId, String property, String newPropertyValue) throws XMLStreamException, IOException {
+		if (property == null) {
+			logger.debug("Property [{}] is null, nothing to do.");
+			return;
+		}
+		if (newPropertyValue == null) {
+			logger.debug("newPropertyValue of property [{}] is null, nothing to do.", property);
+			return;
+		}
+
+		if (profileId == null && newPropertyValue.equals(getProperties().getProperty(property))) {
+			return;
+		}
+
+		if (profileId != null && newPropertyValue.equals(getProfileProperties(profileId).getProperty(property))) {
+			return;
+		}
+
+		if (profileId == null) {
+			logger.debug("Adjusting property  [{}] from [{}] to [{}] of [{}]", property, getProperties().getProperty(property), newPropertyValue, getPath());
+
+		} else {
+			logger.debug("Adjusting property [{}] from [{}] to [{}] of profile [{}] of [{}]", property, getProperties().getProperty(property),
+			        newPropertyValue,
+			        profileId, getPath());
+		}
+		boolean propertyChanged = PomHelper.setPropertyVersion(pom, profileId, property, newPropertyValue);
+		if (propertyChanged) {
+			changed = true;
+			rawModel = PomHelper.getRawModel(pom);
+		}
+	}
+
+	public List<Profile> getProfiles() {
+		return getRawModel().getProfiles();
+	}
+
+	private Model getRawModel() {
+		return rawModel;
 	}
 
 }

@@ -47,13 +47,13 @@ Usage: <main class> [options] [command] [command options]
              Base Pom
         * -o, --our
              Our Pom
+        * -t, --their
+             Their Pom
           -s, --select
              Which version to select to resolve conflicts.  'our', 'their', or
              'prompt'.  If 'prompt' is specified, then you will be prompted via
              stdout/stdin to select a version.
              Default: our
-        * -t, --their
-             Their Pom
 
     replace      Updates the parent version and/or the project version in the given pom.xml
       Usage: replace [options]
@@ -83,8 +83,8 @@ This command is used as pom merge driver in git. To configure it you have to do 
 		driver = java -jar <pathToJar>/pomutils-X.X.jar merge --base=%O --our=%A --their=%B
 	```
 
-	To speed up the vm start, I use the following line:	
-	
+	To speed up the vm start, I use the following line:
+
 	```driver = java -jar -client -Xverify:none -Xms32m -Xmx32m  <pathToJar>/pomutils-X.X.jar merge --base=%O --our=%A --their=%B```
 
 3. Done.

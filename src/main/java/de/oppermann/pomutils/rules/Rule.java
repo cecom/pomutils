@@ -1,5 +1,9 @@
 package de.oppermann.pomutils.rules;
 
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
+
 import de.oppermann.pomutils.util.POM;
 
 /*
@@ -29,6 +33,6 @@ import de.oppermann.pomutils.util.POM;
 
 public interface Rule {
 
-	void evaluate(POM basePom, POM ourPom, POM theirPom);
+	void evaluate(POM basePom, POM ourPom, POM theirPom) throws IOException, XMLStreamException;
 
 }

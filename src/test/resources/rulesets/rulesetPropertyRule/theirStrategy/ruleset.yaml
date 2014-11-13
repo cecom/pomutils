@@ -1,0 +1,8 @@
+--- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
+    strategy: THEIR                     # possible values: OUR|THEIR
+
+--- !!de.oppermann.pomutils.rules.PropertyRule
+    strategy  : THEIR                   # possible values: OUR|THEIR
+    properties:                          # a list of property names
+       - foobar
+       - jdbc.base.url

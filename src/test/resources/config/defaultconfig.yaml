@@ -1,17 +1,17 @@
 --- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
-    strategy: OUR # possible values: OUR|THEIR|PROMPT
+strategy: OUR # possible values: OUR|THEIR|PROMPT
+
 --- !!de.oppermann.pomutils.rules.PropertyRule
-    strategy: ours                      # possible values: ours|theirs
-        names :                           # a list of property names
+strategy  : OUR                   # possible values: OUR|THEIR
+properties:                       # a list of property names
             - jdbc.user.name
             - foobar.version
---- !!de.oppermann.pomutils.rules.DependencyVersionRule
-    strategy: ours                      # possible values: ours|theirs
-    GroupIds:
-        - de.oppermann.pomutils         # all dependencies which have as groupId de.oppermann.pomutils will have automatic version resolution
-        - de.oppermann.pomutils:        # all dependencies which have as groupId de.oppermann.pomutils
-             artifactIds:                # and have one of the following artifactId's will have automatic version resolution
-             - foo
-             - bar
 
+--- !!de.oppermann.pomutils.rules.DependencyVersionRule
+strategy: OUR                     # possible values: OUR|THEIR
+groupIds:
+   - de.oppermann.pomutils:        # all dependencies which have as groupId de.oppermann.pomutils will have automatic version resolution
+   - org.codehaus.mojo:            # all dependencies which have as groupId org.codehaus.mojo
+        - versions-maven-plugin    # and have one of the following artifactId's will have automatic version resolution
+        - foo
 
