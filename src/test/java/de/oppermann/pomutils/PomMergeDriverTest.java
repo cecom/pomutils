@@ -24,6 +24,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
+import org.codehaus.mojo.versions.api.PomHelper;
 
 import de.oppermann.pomutils.util.POM;
 
@@ -55,11 +56,17 @@ public class PomMergeDriverTest extends TestCase {
 		int mergeReturnValue = pomMergeDriver.doGitMerge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-
+		
 		POM theirPom = new POM(theirPomFile);
 		POM ourPom = new POM(ourPomFile);
 
 		assertEquals("same version now", ourPom.getProjectVersion(), theirPom.getProjectVersion());
+		
+		
+		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
+		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		
+		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
 	public void testAutoMergeFailed() throws Exception {
