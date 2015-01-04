@@ -21,19 +21,20 @@ package de.oppermann.pomutils.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.model.Parent;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-import org.codehaus.plexus.util.IOUtil;
-import org.codehaus.plexus.util.WriterFactory;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.stax2.XMLInputFactory2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ctc.wstx.stax.WstxInputFactory;
 
 /**
  * 
@@ -41,6 +42,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class POM {
+
+	private static final XMLInputFactory XML_INPUT_FACTORY = initializeXmlInputFactory();
 
 	private final Logger logger = LoggerFactory.getLogger(POM.class);
 
@@ -52,6 +55,9 @@ public class POM {
 	 */
 	private boolean changed = false;
 
+	private String projectVersion;
+	private String parentVersion;
+
 	public POM(String pomFileAsString) {
 		pomFile = new File(pomFileAsString);
 		if (!pomFile.exists()) {
@@ -61,19 +67,25 @@ public class POM {
 		initialize();
 	}
 
+	private static XMLInputFactory initializeXmlInputFactory()
+			throws FactoryConfigurationError {
+		XMLInputFactory inputFactory = new WstxInputFactory();
+		inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
+		return inputFactory;
+	}
+
 	private void initialize() {
-		StringBuilder input;
 		try {
-			input = PomHelper.readXmlFile(pomFile);
+			StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
+			pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
+			projectVersion = PomHelper.getProjectVersion(pom);
+			
+			Parent parent = PomHelper.getRawModel(pom).getParent();
+			parentVersion = parent != null
+					? parent.getVersion()
+					: null;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-
-		XMLInputFactory inputFactory = XMLInputFactory2.newInstance();
-		inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
-
-		try {
-			pom = new ModifiedPomXMLEventReader(input, inputFactory);
 		} catch (XMLStreamException e) {
 			throw new RuntimeException(e);
 		}
@@ -84,11 +96,7 @@ public class POM {
 	 * @return the version and null if the project version doesn't exist
 	 */
 	public String getProjectVersion() {
-		try {
-			return PomHelper.getProjectVersion(pom);
-		} catch (XMLStreamException e) {
-			throw new RuntimeException(e);
-		}
+		return projectVersion;
 	}
 
 	/**
@@ -96,15 +104,7 @@ public class POM {
 	 * @return the version of the parent, null if there is no parent
 	 */
 	public String getParentVersion() {
-		try {
-			Parent parent = PomHelper.getRawModel(pomFile).getParent();
-			if (parent != null) {
-				return parent.getVersion();
-			}
-			return null;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return parentVersion;
 	}
 
 	/**
@@ -112,20 +112,12 @@ public class POM {
 	 * @param newVersion
 	 */
 	public void setParentVersion(String newVersion) {
-		try {
-			if (getParentVersion() == null) {
-				return;
-			}
-			if (getParentVersion().equals(newVersion)) {
-				return;
-			}
-
-			logger.debug("Adjusting parent version from [{}] to [{}] of [{}]", getParentVersion(), newVersion, getPath());
-			changed |= PomHelper.setProjectParentVersion(pom, newVersion);
-		} catch (XMLStreamException e) {
-			throw new RuntimeException(e);
+		if (this.parentVersion == null || this.parentVersion.equals(newVersion)) {
+			return;
 		}
-
+		logger.debug("Adjusting parent version from [{}] to [{}] of [{}]", this.parentVersion, newVersion, getPath());
+		this.parentVersion = newVersion;
+		this.changed = true;
 	}
 
 	/**
@@ -133,19 +125,13 @@ public class POM {
 	 * @param newVersion
 	 */
 	public void setProjectVersion(String newVersion) {
-		try {
-			if (getProjectVersion() == null) {
-				return;
-			}
-			if (getProjectVersion().equals(newVersion)) {
-				return;
-			}
-
-			logger.debug("Adjusting project version from [{}] to [{}] of [{}]", getProjectVersion(), newVersion, getPath());
-			changed |= PomHelper.setProjectVersion(pom, newVersion);
-		} catch (XMLStreamException e) {
-			throw new RuntimeException(e);
+		if (this.projectVersion == null || this.projectVersion.equals(newVersion)) {
+			return;
 		}
+		logger.debug("Adjusting project version from [{}] to [{}] of [{}]", this.projectVersion, newVersion, getPath());
+		this.projectVersion = newVersion;
+		this.changed = true;
+		
 	}
 
 	/**
@@ -155,16 +141,25 @@ public class POM {
 		if (!changed) {
 			return;
 		}
-
-		Writer writer = null;
+		
 		try {
-			writer = WriterFactory.newXmlWriter(pomFile);
-			IOUtil.copy(pom.asStringBuilder().toString(), writer);
+			if (this.projectVersion != null) {
+				changed |= PomHelper.setProjectVersion(pom, this.projectVersion);
+			}
+			
+			if (this.parentVersion != null) {
+				changed |= PomHelper.setProjectParentVersion(pom, this.parentVersion);
+			}
+			
+			if (!changed) {
+				return;
+			}
+			
+			FileUtils.fileWrite(pomFile.getAbsolutePath(), pom.asStringBuilder().toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-		finally {
-			IOUtil.close(writer);
+		} catch (XMLStreamException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

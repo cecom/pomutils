@@ -25,6 +25,9 @@ import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
 import org.codehaus.mojo.versions.api.PomHelper;
+import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+
+import com.ctc.wstx.stax.WstxInputFactory;
 
 import de.oppermann.pomutils.util.POM;
 
@@ -81,8 +84,10 @@ public class PomMergeDriverTest extends TestCase {
 		assertTrue("merge conflict", mergeReturnValue == 1);
 
 		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
-
-		assertEquals("same version now", ourPom.getProjectVersion(), theirPom.getProjectVersion());
+		
+		StringBuilder ourPomString = new StringBuilder(FileUtils.readFileToString(new File(ourPomFile)));
+		String ourProjectVersion = PomHelper.getProjectVersion(new ModifiedPomXMLEventReader(ourPomString, new WstxInputFactory()));
+		
+		assertEquals("same version now", ourProjectVersion, theirPom.getProjectVersion());
 	}
 }
