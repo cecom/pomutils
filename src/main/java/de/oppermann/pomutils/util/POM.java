@@ -26,6 +26,7 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
@@ -78,11 +79,10 @@ public class POM {
 		try {
 			StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
 			pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
-			projectVersion = PomHelper.getProjectVersion(pom);
-			
-			Parent parent = PomHelper.getRawModel(pom).getParent();
-			parentVersion = parent != null
-					? parent.getVersion()
+			Model model = PomHelper.getRawModel(pom);
+			projectVersion = model.getVersion();
+			parentVersion = model.getParent() != null
+					? model.getParent().getVersion()
 					: null;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
