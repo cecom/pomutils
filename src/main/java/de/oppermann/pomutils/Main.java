@@ -61,7 +61,7 @@ public class Main {
 
 		logger = LoggerFactory.getLogger(Main.class);
 
-		logger.info("PomUtils {}", ManifestUtils.getManifestVersion());
+		logger.info("PomUtils version {}", ManifestUtils.getImplementationVersion());
 
 		if ("merge".equals(jc.getParsedCommand())) {
 			return executePomMergeDriver(mergeCommand);
