@@ -19,10 +19,10 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
+import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,16 +90,10 @@ public class PomMergeDriver {
 	}
 
 	private void consumeGitOutput(final Process p) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-		logger.debug("Git merge output:");
-		logger.debug("=====================================");
-		String line;
-		while ((line = reader.readLine()) != null) {
-			logger.debug(line);
-		}
-		reader.close();
-		logger.debug("=====================================");
+		
+		String output = IOUtil.toString(new BufferedInputStream(p.getInputStream(), 256));
+		
+		logger.debug("Git merge output:\n{}", output);
 	}
 
 }
