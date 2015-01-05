@@ -56,7 +56,7 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = "target/testresources/merge/autoMergeSucceded/our.pom.xml";
 		String theirPomFile = "target/testresources/merge/autoMergeSucceded/their.pom.xml";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR);
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR.getSelector());
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
@@ -78,7 +78,7 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = "target/testresources/merge/autoMergeSucceded_their/our.pom.xml";
 		String theirPomFile = "target/testresources/merge/autoMergeSucceded_their/their.pom.xml";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.THEIR);
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.THEIR.getSelector());
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
@@ -100,7 +100,7 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = "target/testresources/merge/autoMergeSucceded_prompt/our.pom.xml";
 		String theirPomFile = "target/testresources/merge/autoMergeSucceded_prompt/their.pom.xml";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.PROMPT, new VersionSelector() {
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, new VersionSelector() {
 			
 			@Override
 			public String selectVersion(String projectIdentifier, String ourVersion, String theirVersion) {
@@ -128,7 +128,7 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = "target/testresources/merge/autoMergeFailed/our.pom.xml";
 		String theirPomFile = "target/testresources/merge/autoMergeFailed/their.pom.xml";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR);
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.OUR.getSelector());
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge conflict", mergeReturnValue == 1);

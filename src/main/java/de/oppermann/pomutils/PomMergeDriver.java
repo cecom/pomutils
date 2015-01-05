@@ -26,9 +26,6 @@ import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.oppermann.pomutils.select.ConsoleVersionSelector;
-import de.oppermann.pomutils.select.PersistentVersionSelector;
-import de.oppermann.pomutils.select.SelectionStrategy;
 import de.oppermann.pomutils.select.VersionSelector;
 import de.oppermann.pomutils.util.POM;
 
@@ -45,22 +42,16 @@ public class PomMergeDriver {
 	private final POM basePom;
 	private final POM ourPom;
 	private final POM theirPom;
-	private final SelectionStrategy selectionStrategy;
 	
 	/**
-	 * The version selector to use when {@link #selectionStrategy} is {@link SelectionStrategy#PROMPT}.
+	 * The version selector to use resolve version conflicts.
 	 */
 	private final VersionSelector versionSelector;
 
-	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, SelectionStrategy selectionStrategy) {
-		this(basePomFile, ourPomFile, theirPomFile, selectionStrategy, new PersistentVersionSelector(new ConsoleVersionSelector()));
-	}
-
-	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, SelectionStrategy selectVersion, VersionSelector versionSelector) {
+	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, VersionSelector versionSelector) {
 		basePom = new POM(basePomFile);
 		ourPom = new POM(ourPomFile);
 		theirPom = new POM(theirPomFile);
-		this.selectionStrategy = selectVersion;
 		this.versionSelector = versionSelector;
 	}
 
@@ -75,19 +66,7 @@ public class PomMergeDriver {
 		}
 		
 		if (ourVersion != null && theirVersion != null && !ourVersion.equals(theirVersion)) {
-			final String newVersion;
-			switch (this.selectionStrategy) {
-				case PROMPT:
-					newVersion = versionSelector.selectVersion(ourPom.getProjectIdentifier(), ourVersion, theirVersion);
-					break;
-				case THEIR:
-					newVersion = theirVersion;
-					break;
-				case OUR:
-				default:
-					newVersion = ourVersion;
-					break;
-			}
+			String newVersion = versionSelector.selectVersion(ourPom.getProjectIdentifier(), ourVersion, theirVersion);
 					
 			if (newVersion != null) {
 						

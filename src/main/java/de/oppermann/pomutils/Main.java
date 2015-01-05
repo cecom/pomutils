@@ -83,7 +83,7 @@ public class Main {
 
 	private static int executePomMergeDriver(CommandPomMergeDriver mergeCommand) {
 		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getBasePom(), mergeCommand.getOurPom(),
-		        mergeCommand.getTheirPom(), mergeCommand.getSelectionStrategy());
+		        mergeCommand.getTheirPom(), mergeCommand.getSelectionStrategy().getSelector());
 		return pomMergeDriver.merge();
 	}
 
