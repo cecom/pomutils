@@ -22,13 +22,15 @@ package de.oppermann.pomutils.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
+import de.oppermann.pomutils.select.SelectionStrategy;
+
 /**
  * 
  * @author Sven Oppermann <sven.oppermann@gmail.com>
  * 
  */
 
-@Parameters(separators = "=", commandDescription = "Used as merge driver in git. Updates the version of 'their pom.xml' with the version from 'our pom.xml' and does finally a normal 'git merge-file'")
+@Parameters(separators = "=", commandDescription = "Used as merge driver in git.  Updates the version of 'our' pom or 'their' pom (based on the value of --select), and then does a normal 'git merge-file'")
 public class CommandPomMergeDriver {
 
 	@Parameter(names = { "-b", "--base" }, description = "Base Pom", required = true)
@@ -39,6 +41,9 @@ public class CommandPomMergeDriver {
 
 	@Parameter(names = { "-t", "--their" }, description = "Their Pom", required = true)
 	private String theirPom;
+
+	@Parameter(names = { "-s", "--select" }, description = "Which version to select to resolve conflicts.  'our', 'their', or 'prompt'.  If 'prompt' is specified, then you will be prompted on the console to select a version.", required = false, converter = SelectionStrategyConverter.class)
+	private SelectionStrategy selectionStrategy = SelectionStrategy.OUR;
 
 	public String getBasePom() {
 		return basePom;
@@ -51,4 +56,9 @@ public class CommandPomMergeDriver {
 	public String getTheirPom() {
 		return theirPom;
 	}
+	
+	public SelectionStrategy getSelectionStrategy() {
+		return selectionStrategy;
+	}
+	
 }

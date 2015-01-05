@@ -19,11 +19,6 @@ package de.oppermann.pomutils.util;
  * under the License.
  */
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * 
@@ -33,27 +28,11 @@ import java.util.jar.Manifest;
 
 public class ManifestUtils {
 
-	public static String getManifestVersion() {
-		Class<ManifestUtils> clazz = ManifestUtils.class;
-
-		String className = clazz.getSimpleName() + ".class";
-		String classPath = clazz.getResource(className).toString();
-
-		if (!classPath.startsWith("jar")) {
-			return "not a jar";
-		}
-		String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-		Manifest manifest;
-
-		try {
-			manifest = new Manifest(new URL(manifestPath).openStream());
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		Attributes attr = manifest.getMainAttributes();
-		return attr.getValue("Manifest-Version");
+	public static String getImplementationVersion() {
+		String version = ManifestUtils.class.getPackage().getImplementationVersion();
+		return (version == null)
+			? "Unknown (not a jar)"
+			: version;
 	}
 
 }
