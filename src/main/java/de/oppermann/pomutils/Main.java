@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 
 import de.oppermann.pomutils.commands.CommandMain;
 import de.oppermann.pomutils.commands.CommandPomMergeDriver;
@@ -54,7 +55,12 @@ public class Main {
 		jc.addCommand("merge", mergeCommand);
 		jc.addCommand("replace", versionReplacerCommand);
 
-		jc.parse(args);
+		try {
+			jc.parse(args);
+		} catch (ParameterException e) {
+			System.err.println(e.getMessage());
+			return 1;
+		}
 
 		String logLevel = mainCommand.isDebug() ? "debug" : "error";
 		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", logLevel);
@@ -77,9 +83,8 @@ public class Main {
 
 	private static int executePomMergeDriver(CommandPomMergeDriver mergeCommand) {
 		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getBasePom(), mergeCommand.getOurPom(),
-		        mergeCommand.getTheirPom());
-		pomMergeDriver.adjustTheirPomVersion();
-		return pomMergeDriver.doGitMerge();
+		        mergeCommand.getTheirPom(), mergeCommand.getSelectionStrategy());
+		return pomMergeDriver.merge();
 	}
 
 	private static void executePomVersionReplacer(CommandPomVersionReplacer versionReplacerCommand) {

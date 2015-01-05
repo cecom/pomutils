@@ -26,6 +26,10 @@ import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.oppermann.pomutils.select.ConsoleVersionSelector;
+import de.oppermann.pomutils.select.PersistentVersionSelector;
+import de.oppermann.pomutils.select.SelectionStrategy;
+import de.oppermann.pomutils.select.VersionSelector;
 import de.oppermann.pomutils.util.POM;
 
 /**
@@ -37,25 +41,74 @@ import de.oppermann.pomutils.util.POM;
 public class PomMergeDriver {
 
 	private final Logger logger = LoggerFactory.getLogger(PomMergeDriver.class);
+	
+	private final POM basePom;
+	private final POM ourPom;
+	private final POM theirPom;
+	private final SelectionStrategy selectionStrategy;
+	
+	/**
+	 * The version selector to use when {@link #selectionStrategy} is {@link SelectionStrategy#PROMPT}.
+	 */
+	private final VersionSelector versionSelector;
 
-	private POM basePom;
-	private POM ourPom;
-	private POM theirPom;
+	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, SelectionStrategy selectionStrategy) {
+		this(basePomFile, ourPomFile, theirPomFile, selectionStrategy, new PersistentVersionSelector(new ConsoleVersionSelector()));
+	}
 
-	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile) {
+	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, SelectionStrategy selectVersion, VersionSelector versionSelector) {
 		basePom = new POM(basePomFile);
 		ourPom = new POM(ourPomFile);
 		theirPom = new POM(theirPomFile);
+		this.selectionStrategy = selectVersion;
+		this.versionSelector = versionSelector;
 	}
 
-	public void adjustTheirPomVersion() {
-		adjustParentVersion();
-		adjustProjectVersion();
-		theirPom.savePom();
+	public int merge() {
+		
+		String ourVersion = ourPom.getProjectVersion();
+		String theirVersion = theirPom.getProjectVersion();
+		
+		if (ourVersion == null) {
+			ourVersion = ourPom.getParentVersion();
+			theirVersion = theirPom.getParentVersion();
+		}
+		
+		if (ourVersion != null && theirVersion != null && !ourVersion.equals(theirVersion)) {
+			final String newVersion;
+			switch (this.selectionStrategy) {
+				case PROMPT:
+					newVersion = versionSelector.selectVersion(ourPom.getProjectIdentifier(), ourVersion, theirVersion);
+					break;
+				case THEIR:
+					newVersion = theirVersion;
+					break;
+				case OUR:
+				default:
+					newVersion = ourVersion;
+					break;
+			}
+					
+			if (newVersion != null) {
+						
+				POM pomToAdjust = newVersion.equals(ourVersion)
+						? theirPom
+						: ourPom;
+				
+				adjustPomVersion(pomToAdjust, newVersion);
+			}
+		}
+		return doGitMerge();
 	}
 
-	public int doGitMerge() {
-		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "our", "-L", "base", "-L", "theirs", ourPom.getPath(),
+	private void adjustPomVersion(POM pomToAdjust, String newVersion) {
+		pomToAdjust.setProjectVersion(newVersion);
+		pomToAdjust.setParentVersion(newVersion);
+		pomToAdjust.savePom();
+	}
+
+	private int doGitMerge() {
+		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L", "theirs", ourPom.getPath(),
 		        basePom.getPath(), theirPom.getPath());
 		processBuilder.redirectErrorStream(true);
 		try {
@@ -68,24 +121,6 @@ public class PomMergeDriver {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	private void adjustParentVersion() {
-		String ourParentVersion = ourPom.getParentVersion();
-		String theirParentVersion = theirPom.getParentVersion();
-
-		if (ourParentVersion != null && !ourParentVersion.equals(theirParentVersion)) {
-			theirPom.setParentVersion(ourParentVersion);
-		}
-	}
-
-	private void adjustProjectVersion() {
-		String ourVersion = ourPom.getProjectVersion();
-		String theirVersion = theirPom.getProjectVersion();
-
-		if (ourVersion != null && !ourVersion.equals(theirVersion)) {
-			theirPom.setProjectVersion(ourVersion);
 		}
 	}
 

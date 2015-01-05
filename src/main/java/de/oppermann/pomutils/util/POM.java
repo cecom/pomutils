@@ -27,7 +27,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Parent;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import org.codehaus.plexus.util.FileUtils;
@@ -58,6 +57,7 @@ public class POM {
 
 	private String projectVersion;
 	private String parentVersion;
+	private String projectIdentifier;
 
 	public POM(String pomFileAsString) {
 		pomFile = new File(pomFileAsString);
@@ -80,6 +80,7 @@ public class POM {
 			StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
 			pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
 			Model model = PomHelper.getRawModel(pom);
+			projectIdentifier = calculateProjectIdentifier(model);
 			projectVersion = model.getVersion();
 			parentVersion = model.getParent() != null
 					? model.getParent().getVersion()
@@ -89,6 +90,38 @@ public class POM {
 		} catch (XMLStreamException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private String calculateProjectIdentifier(Model model) {
+		String groupId = model.getGroupId();
+		String parentGroupId = model.getParent() != null ? model.getParent().getGroupId() : null;
+		String artifactId = model.getArtifactId();
+		String projectName = model.getName();
+		
+		StringBuilder identifier = new StringBuilder(64);
+		
+		if (projectName != null) {
+			identifier.append(projectName);
+			identifier.append(" (");
+		}
+		
+		if (groupId != null) {
+			identifier.append(groupId);
+			identifier.append(":");
+		} else if (parentGroupId != null) {
+			identifier.append(parentGroupId);
+			identifier.append(":");
+		}
+		
+		if (artifactId != null) {
+			identifier.append(artifactId);
+		}
+		
+		if (projectName != null) {
+			identifier.append(")");
+		}
+		
+		return identifier.toString();
 	}
 
 	/**
@@ -106,7 +139,14 @@ public class POM {
 	public String getParentVersion() {
 		return parentVersion;
 	}
-
+	
+	/**
+	 * Gets an identifier that can be used for logging/prompting.
+	 */
+	public String getProjectIdentifier() {
+		return projectIdentifier;
+	}
+	
 	/**
 	 * Sets the parent version to the given one, if it exists
 	 * @param newVersion
