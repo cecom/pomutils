@@ -21,6 +21,8 @@ package de.oppermann.pomutils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
@@ -47,6 +49,34 @@ public class PomMergeDriver {
 	 * The version selector to use resolve version conflicts.
 	 */
 	private final VersionSelector versionSelector;
+	
+	private static enum VersionField {
+		PROJECT {
+			@Override
+			public String get(POM pom) {
+				return pom.getProjectVersion();
+			}
+			@Override
+			public void set(POM pom, String newVersion) {
+				pom.setProjectVersion(newVersion);
+			}
+			
+		},
+		PARENT {
+			@Override
+			public String get(POM pom) {
+				return pom.getParentVersion();
+			}
+			@Override
+			public void set(POM pom, String newVersion) {
+				pom.setParentVersion(newVersion);
+			}
+			
+		};
+		
+		public abstract String get(POM pom);
+		public abstract void set(POM pom, String newVersion);
+	}
 
 	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, VersionSelector versionSelector) {
 		basePom = new POM(basePomFile);
@@ -57,15 +87,28 @@ public class PomMergeDriver {
 
 	public int merge() {
 		
-		String ourVersion = ourPom.getProjectVersion();
-		String theirVersion = theirPom.getProjectVersion();
+		List<POM> adjustedPoms = new ArrayList<POM>();
 		
-		if (ourVersion == null) {
-			ourVersion = ourPom.getParentVersion();
-			theirVersion = theirPom.getParentVersion();
+		addIfNotNull(adjustedPoms, adjustVersion(VersionField.PROJECT));
+		addIfNotNull(adjustedPoms, adjustVersion(VersionField.PARENT));
+		
+		for (POM adjustedPom : adjustedPoms) {
+			adjustedPom.savePom();
 		}
 		
-		if (ourVersion != null && theirVersion != null && !ourVersion.equals(theirVersion)) {
+		return doGitMerge();
+	}
+
+	private void addIfNotNull(List<POM> adjustedPoms, POM adjustedPom) {
+		if (adjustedPom != null) {
+			adjustedPoms.add(adjustedPom);
+		}
+	}
+
+	private POM adjustVersion(VersionField versionField) {
+		String ourVersion = versionField.get(ourPom);
+		String theirVersion = versionField.get(theirPom);
+		if (ourVersion != null && !ourVersion.equals(theirVersion)) {
 			String newVersion = versionSelector.selectVersion(ourPom.getProjectIdentifier(), ourVersion, theirVersion);
 					
 			if (newVersion != null) {
@@ -74,16 +117,11 @@ public class PomMergeDriver {
 						? theirPom
 						: ourPom;
 				
-				adjustPomVersion(pomToAdjust, newVersion);
+				versionField.set(pomToAdjust, newVersion);
+				return pomToAdjust;
 			}
 		}
-		return doGitMerge();
-	}
-
-	private void adjustPomVersion(POM pomToAdjust, String newVersion) {
-		pomToAdjust.setProjectVersion(newVersion);
-		pomToAdjust.setParentVersion(newVersion);
-		pomToAdjust.savePom();
+		return null;
 	}
 
 	private int doGitMerge() {
