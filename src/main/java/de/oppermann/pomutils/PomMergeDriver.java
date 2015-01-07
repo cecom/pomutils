@@ -79,16 +79,36 @@ public class PomMergeDriver {
 	}
 
 	private POM adjustVersion(VersionFieldType versionFieldType) {
+		String baseVersion = versionFieldType.get(basePom);
 		String ourVersion = versionFieldType.get(ourPom);
 		String theirVersion = versionFieldType.get(theirPom);
-		if (ourVersion != null && !ourVersion.equals(theirVersion)) {
-			String newVersion = versionSelector.selectVersion(
-					ourPom.getProjectIdentifier(),
-					versionFieldType,
-					ourVersion,
-					theirVersion);
+		if (baseVersion != null && ourVersion != null && theirVersion != null && !ourVersion.equals(theirVersion)) {
+			String newVersion;
+			if (baseVersion.equals(ourVersion)) {
+				/*
+				 * Our version hasn't changed, so no conflict.  Just use theirVersion.
+				 */
+				newVersion = theirVersion;
+			} else if (baseVersion.equals(theirVersion)) {
+				/*
+				 * Their version hasn't changed, so no conflict.  Just use ourVersion.
+				 */
+				newVersion = ourVersion;
+			} else {
+				/*
+				 * Both our version and their version have changed from the base, so conflict.
+				 */
+				newVersion = versionSelector.selectVersion(
+						ourPom.getProjectIdentifier(),
+						versionFieldType,
+						ourVersion,
+						theirVersion);
+			}
 					
 			if (newVersion != null) {
+				/*
+				 * newVersion can be null if the user wants to skip resolution.
+				 */
 						
 				POM pomToAdjust = newVersion.equals(ourVersion)
 						? theirPom

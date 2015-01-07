@@ -95,6 +95,50 @@ public class PomMergeDriverTest extends TestCase {
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
 
+	public void testAutoMergeSucceded_noConflict_our() throws Exception {
+		String basePomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/base.pom.xml";
+		String ourPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/our.pom.xml";
+		String theirPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_our/their.pom.xml";
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.PROMPT.getSelector());
+		int mergeReturnValue = pomMergeDriver.merge();
+
+		assertTrue("merge succeeded", mergeReturnValue == 0);
+		
+		POM theirPom = new POM(theirPomFile);
+		POM ourPom = new POM(ourPomFile);
+
+		assertEquals("our", ourPom.getProjectVersion());
+		assertEquals("our", theirPom.getProjectVersion());
+		
+		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
+		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		
+		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
+	}
+
+	public void testAutoMergeSucceded_noConflict_their() throws Exception {
+		String basePomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/base.pom.xml";
+		String ourPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/our.pom.xml";
+		String theirPomFile = "target/testresources/merge/autoMergeSucceded_noConflict_their/their.pom.xml";
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, SelectionStrategy.PROMPT.getSelector());
+		int mergeReturnValue = pomMergeDriver.merge();
+
+		assertTrue("merge succeeded", mergeReturnValue == 0);
+		
+		POM theirPom = new POM(theirPomFile);
+		POM ourPom = new POM(ourPomFile);
+
+		assertEquals("their", ourPom.getProjectVersion());
+		assertEquals("their", theirPom.getProjectVersion());
+		
+		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
+		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		
+		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
+	}
+
 	public void testAutoMergeSucceded_prompt() throws Exception {
 		String basePomFile = "target/testresources/merge/autoMergeSucceded_prompt/base.pom.xml";
 		String ourPomFile = "target/testresources/merge/autoMergeSucceded_prompt/our.pom.xml";
