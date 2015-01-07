@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import de.oppermann.pomutils.select.VersionSelector;
 import de.oppermann.pomutils.util.POM;
+import de.oppermann.pomutils.util.VersionFieldType;
 
 /**
  * 
@@ -50,34 +51,6 @@ public class PomMergeDriver {
 	 */
 	private final VersionSelector versionSelector;
 	
-	private static enum VersionField {
-		PROJECT {
-			@Override
-			public String get(POM pom) {
-				return pom.getProjectVersion();
-			}
-			@Override
-			public void set(POM pom, String newVersion) {
-				pom.setProjectVersion(newVersion);
-			}
-			
-		},
-		PARENT {
-			@Override
-			public String get(POM pom) {
-				return pom.getParentVersion();
-			}
-			@Override
-			public void set(POM pom, String newVersion) {
-				pom.setParentVersion(newVersion);
-			}
-			
-		};
-		
-		public abstract String get(POM pom);
-		public abstract void set(POM pom, String newVersion);
-	}
-
 	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, VersionSelector versionSelector) {
 		basePom = new POM(basePomFile);
 		ourPom = new POM(ourPomFile);
@@ -89,8 +62,8 @@ public class PomMergeDriver {
 		
 		List<POM> adjustedPoms = new ArrayList<POM>();
 		
-		addIfNotNull(adjustedPoms, adjustVersion(VersionField.PROJECT));
-		addIfNotNull(adjustedPoms, adjustVersion(VersionField.PARENT));
+		addIfNotNull(adjustedPoms, adjustVersion(VersionFieldType.PROJECT));
+		addIfNotNull(adjustedPoms, adjustVersion(VersionFieldType.PARENT));
 		
 		for (POM adjustedPom : adjustedPoms) {
 			adjustedPom.savePom();
@@ -105,11 +78,15 @@ public class PomMergeDriver {
 		}
 	}
 
-	private POM adjustVersion(VersionField versionField) {
-		String ourVersion = versionField.get(ourPom);
-		String theirVersion = versionField.get(theirPom);
+	private POM adjustVersion(VersionFieldType versionFieldType) {
+		String ourVersion = versionFieldType.get(ourPom);
+		String theirVersion = versionFieldType.get(theirPom);
 		if (ourVersion != null && !ourVersion.equals(theirVersion)) {
-			String newVersion = versionSelector.selectVersion(ourPom.getProjectIdentifier(), ourVersion, theirVersion);
+			String newVersion = versionSelector.selectVersion(
+					ourPom.getProjectIdentifier(),
+					versionFieldType,
+					ourVersion,
+					theirVersion);
 					
 			if (newVersion != null) {
 						
@@ -117,7 +94,7 @@ public class PomMergeDriver {
 						? theirPom
 						: ourPom;
 				
-				versionField.set(pomToAdjust, newVersion);
+				versionFieldType.set(pomToAdjust, newVersion);
 				return pomToAdjust;
 			}
 		}

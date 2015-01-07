@@ -30,7 +30,7 @@ import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
 import com.ctc.wstx.stax.WstxInputFactory;
 
 import de.oppermann.pomutils.select.SelectionStrategy;
-import de.oppermann.pomutils.select.VersionSelector;
+import de.oppermann.pomutils.select.TheirVersionSelector;
 import de.oppermann.pomutils.util.POM;
 
 /**
@@ -100,13 +100,7 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = "target/testresources/merge/autoMergeSucceded_prompt/our.pom.xml";
 		String theirPomFile = "target/testresources/merge/autoMergeSucceded_prompt/their.pom.xml";
 
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, new VersionSelector() {
-			
-			@Override
-			public String selectVersion(String projectIdentifier, String ourVersion, String theirVersion) {
-				return theirVersion;
-			}
-		});
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(basePomFile, ourPomFile, theirPomFile, new TheirVersionSelector());
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);

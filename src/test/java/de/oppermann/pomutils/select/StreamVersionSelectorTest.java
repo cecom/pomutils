@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 
 import org.junit.Test;
 
+import de.oppermann.pomutils.util.VersionFieldType;
+
 public class StreamVersionSelectorTest {
 	
 	@Test
@@ -14,7 +16,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream(new byte[0]);
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertNull(selector.selectVersion("id", "our", "their"));
+		assertNull(selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -22,7 +24,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("s\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertNull(selector.selectVersion("id", "our", "their"));
+		assertNull(selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -30,7 +32,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("1\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("our", selector.selectVersion("id", "our", "their"));
+		assertEquals("our", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -38,7 +40,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("our\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("our", selector.selectVersion("id", "our", "their"));
+		assertEquals("our", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -46,7 +48,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("2\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("their", selector.selectVersion("id", "our", "their"));
+		assertEquals("their", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -54,7 +56,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("their\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("their", selector.selectVersion("id", "our", "their"));
+		assertEquals("their", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -62,7 +64,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("   2   \n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("their", selector.selectVersion("id", "our", "their"));
+		assertEquals("their", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 	@Test
@@ -70,7 +72,7 @@ public class StreamVersionSelectorTest {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ByteArrayInputStream bais = new ByteArrayInputStream("x\n2\n".getBytes());
 		StreamVersionSelector selector = new StreamVersionSelector(baos, bais);
-		assertEquals("their", selector.selectVersion("id", "our", "their"));
+		assertEquals("their", selector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 	}
 
 }
