@@ -44,6 +44,7 @@ public class Main {
 
 	public static void main(String... args) {
 		int resultValue = mainInternal(args);
+		logger.debug("Exiting with exit code {}", resultValue);
 		System.exit(resultValue);
 	}
 

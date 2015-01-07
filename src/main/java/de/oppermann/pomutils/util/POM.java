@@ -59,7 +59,7 @@ public class POM {
 	private String parentVersion;
 	private String projectIdentifier;
 
-	public POM(String pomFileAsString) {
+	public POM(String pomFileAsString) throws IOException, XMLStreamException {
 		pomFile = new File(pomFileAsString);
 		if (!pomFile.exists()) {
 			throw new IllegalArgumentException("File [" + pomFile.getAbsolutePath() + "] not found.");
@@ -75,21 +75,15 @@ public class POM {
 		return inputFactory;
 	}
 
-	private void initialize() {
-		try {
-			StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
-			pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
-			Model model = PomHelper.getRawModel(pom);
-			projectIdentifier = calculateProjectIdentifier(model);
-			projectVersion = model.getVersion();
-			parentVersion = model.getParent() != null
-					? model.getParent().getVersion()
-					: null;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (XMLStreamException e) {
-			throw new RuntimeException(e);
-		}
+	private void initialize() throws IOException, XMLStreamException {
+		StringBuilder input = new StringBuilder(FileUtils.fileRead(pomFile));
+		pom = new ModifiedPomXMLEventReader(input, XML_INPUT_FACTORY);
+		Model model = PomHelper.getRawModel(pom);
+		projectIdentifier = calculateProjectIdentifier(model);
+		projectVersion = model.getVersion();
+		parentVersion = model.getParent() != null
+				? model.getParent().getVersion()
+				: null;
 	}
 
 	private String calculateProjectIdentifier(Model model) {
@@ -177,30 +171,24 @@ public class POM {
 	/**
 	 * Saves the pom, if it was changed.
 	 */
-	public void savePom() {
+	public void savePom() throws IOException, XMLStreamException {
 		if (!changed) {
 			return;
 		}
 		
-		try {
-			if (this.projectVersion != null) {
-				changed |= PomHelper.setProjectVersion(pom, this.projectVersion);
-			}
-			
-			if (this.parentVersion != null) {
-				changed |= PomHelper.setProjectParentVersion(pom, this.parentVersion);
-			}
-			
-			if (!changed) {
-				return;
-			}
-			
-			FileUtils.fileWrite(pomFile.getAbsolutePath(), pom.asStringBuilder().toString());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (XMLStreamException e) {
-			throw new RuntimeException(e);
+		if (this.projectVersion != null) {
+			changed |= PomHelper.setProjectVersion(pom, this.projectVersion);
 		}
+		
+		if (this.parentVersion != null) {
+			changed |= PomHelper.setProjectParentVersion(pom, this.parentVersion);
+		}
+		
+		if (!changed) {
+			return;
+		}
+		
+		FileUtils.fileWrite(pomFile.getAbsolutePath(), pom.asStringBuilder().toString());
 	}
 
 	/**

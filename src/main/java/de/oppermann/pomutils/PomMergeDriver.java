@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,31 +44,41 @@ public class PomMergeDriver {
 
 	private final Logger logger = LoggerFactory.getLogger(PomMergeDriver.class);
 	
-	private final POM basePom;
-	private final POM ourPom;
-	private final POM theirPom;
+	private final String basePomFile;
+	private final String ourPomFile;
+	private final String theirPomFile;
 	
 	/**
 	 * The version selector to use resolve version conflicts.
 	 */
 	private final VersionSelector versionSelector;
-	
+
 	public PomMergeDriver(String basePomFile, String ourPomFile, String theirPomFile, VersionSelector versionSelector) {
-		basePom = new POM(basePomFile);
-		ourPom = new POM(ourPomFile);
-		theirPom = new POM(theirPomFile);
+		this.basePomFile = basePomFile;
+		this.ourPomFile = ourPomFile;
+		this.theirPomFile = theirPomFile;
 		this.versionSelector = versionSelector;
 	}
 
 	public int merge() {
 		
-		List<POM> adjustedPoms = new ArrayList<POM>();
-		
-		addIfNotNull(adjustedPoms, adjustVersion(VersionFieldType.PROJECT));
-		addIfNotNull(adjustedPoms, adjustVersion(VersionFieldType.PARENT));
-		
-		for (POM adjustedPom : adjustedPoms) {
-			adjustedPom.savePom();
+		try {
+			POM basePom = new POM(basePomFile);
+			POM ourPom = new POM(ourPomFile);;
+			POM theirPom = new POM(theirPomFile);
+			
+			List<POM> adjustedPoms = new ArrayList<POM>();
+			
+			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PROJECT));
+			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PARENT));
+			
+			for (POM adjustedPom : adjustedPoms) {
+				adjustedPom.savePom();
+			}
+		} catch (IOException e) {
+			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
+		} catch (XMLStreamException e) {
+			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
 		}
 		
 		return doGitMerge();
@@ -78,7 +90,7 @@ public class PomMergeDriver {
 		}
 	}
 
-	private POM adjustVersion(VersionFieldType versionFieldType) {
+	private POM adjustVersion(POM basePom, POM ourPom, POM theirPom, VersionFieldType versionFieldType) {
 		String baseVersion = versionFieldType.get(basePom);
 		String ourVersion = versionFieldType.get(ourPom);
 		String theirVersion = versionFieldType.get(theirPom);
@@ -122,8 +134,8 @@ public class PomMergeDriver {
 	}
 
 	private int doGitMerge() {
-		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L", "theirs", ourPom.getPath(),
-		        basePom.getPath(), theirPom.getPath());
+		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L", "theirs",
+				ourPomFile, basePomFile, theirPomFile);
 		processBuilder.redirectErrorStream(true);
 		try {
 			final Process p = processBuilder.start();
