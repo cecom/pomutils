@@ -155,7 +155,7 @@ public class POM {
 		if (this.parentVersion == null || this.parentVersion.equals(newVersion)) {
 			return;
 		}
-		logger.debug("Adjusting parent version from [{}] to [{}] of [{}]", this.parentVersion, newVersion, getPath());
+		logger.debug("Adjusting parent version from [{}] to [{}] of [{}] for [{}]", this.parentVersion, newVersion, getPath(), this.projectIdentifier);
 		this.parentVersion = newVersion;
 		this.changed = true;
 	}
@@ -168,7 +168,7 @@ public class POM {
 		if (this.projectVersion == null || this.projectVersion.equals(newVersion)) {
 			return;
 		}
-		logger.debug("Adjusting project version from [{}] to [{}] of [{}]", this.projectVersion, newVersion, getPath());
+		logger.debug("Adjusting project version from [{}] to [{}] of [{}] for [{}]", this.projectVersion, newVersion, getPath(), this.projectIdentifier);
 		this.projectVersion = newVersion;
 		this.changed = true;
 		
