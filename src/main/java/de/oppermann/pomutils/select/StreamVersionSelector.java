@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import de.oppermann.pomutils.util.VersionFieldType;
+
 /**
  * A {@link VersionSelector} that prompts the user
  * via an output stream and reads the response via an input stream.
@@ -29,9 +31,11 @@ public class StreamVersionSelector implements VersionSelector {
 	}
 
 	@Override
-	public String selectVersion(String projectIdentifier, String ourVersion, String theirVersion) {
+	public String selectVersion(String projectIdentifier, VersionFieldType versionFieldType, String ourVersion, String theirVersion) {
 		
-		out.printf("%nVersion conflict found in pom file for %s.%n%n", projectIdentifier);
+		out.printf("%n%s version conflict found in pom file for %s.%n%n",
+				versionFieldType == VersionFieldType.PROJECT ? "Project" : "Parent",
+				projectIdentifier);
 		
 		out.println("Select the version to use to resolve the conflict:");
 		out.println();
