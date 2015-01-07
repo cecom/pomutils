@@ -16,9 +16,9 @@ public enum SelectionStrategy {
 	THEIR(new TheirVersionSelector()),
 	
 	/**
-	 * Prompt the user on the console for them to select the version. 
+	 * Prompt the user via stdout/stdin for them to select the version. 
 	 */
-	PROMPT(new PersistentVersionSelector(new ConsoleVersionSelector()));
+	PROMPT(new PersistentVersionSelector(new StreamVersionSelector()));
 	
 	private final VersionSelector selector;
 	

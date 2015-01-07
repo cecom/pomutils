@@ -49,8 +49,8 @@ Usage: <main class> [options] [command] [command options]
              Our Pom
           -s, --select
              Which version to select to resolve conflicts.  'our', 'their', or
-             'prompt'.  If 'prompt' is specified, then you will be prompted on the console
-             to select a version.
+             'prompt'.  If 'prompt' is specified, then you will be prompted via
+             stdout/stdin to select a version.
              Default: our
         * -t, --their
              Their Pom
@@ -92,7 +92,7 @@ This command is used as pom merge driver in git. To configure it you have to do 
 By default, project/parent version conflicts will be resolved using *our* version.
 You can change this behaviour by specifying `--select their` or  `--select prompt` on the command line.
 Select `their` to always resolve version conflicts using *their* version.
-Select `prompt` to prompt the user on the console to select a version at merge time.
+Select `prompt` to prompt the user via stdout/stdin to select a version at merge time.
 Note that you must be performing merges from the command line for `prompt` to work.
 If you use a GUI to perform merge, do not use `--select prompt`, unless the GUI provides
 a way to enter input on the git merge console.
