@@ -21,6 +21,7 @@ package de.oppermann.pomutils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.impl.SimpleLogger;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -63,7 +64,7 @@ public class Main {
 		}
 
 		String logLevel = mainCommand.isDebug() ? "debug" : "error";
-		System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", logLevel);
+		System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, logLevel);
 
 		logger = LoggerFactory.getLogger(Main.class);
 
