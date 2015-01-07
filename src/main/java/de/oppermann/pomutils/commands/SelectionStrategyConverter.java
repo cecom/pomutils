@@ -16,7 +16,7 @@ public class SelectionStrategyConverter implements IStringConverter<SelectionStr
 		try {
 			return SelectionStrategy.valueOf(value.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			throw new ParameterException("--select must be one of 'ours', 'theirs', or 'prompt'");
+			throw new ParameterException("--select must be one of 'our', 'their', or 'prompt'");
 		}
 	}
 

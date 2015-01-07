@@ -42,7 +42,7 @@ public class CommandPomMergeDriver {
 	@Parameter(names = { "-t", "--their" }, description = "Their Pom", required = true)
 	private String theirPom;
 
-	@Parameter(names = { "-s", "--select" }, description = "Which version to select to resolve conflicts.  'our', 'their', or 'prompt'.  If 'prompt' is specified, then you will be prompted on the console to select a version.", required = false, converter = SelectionStrategyConverter.class)
+	@Parameter(names = { "-s", "--select" }, description = "Which version to select to resolve conflicts.  'our', 'their', or 'prompt'.  If 'prompt' is specified, then you will be prompted via stdout/stdin to select a version.", required = false, converter = SelectionStrategyConverter.class)
 	private SelectionStrategy selectionStrategy = SelectionStrategy.OUR;
 
 	public String getBasePom() {

@@ -8,6 +8,8 @@ import java.util.Properties;
 
 import org.codehaus.plexus.util.IOUtil;
 
+import de.oppermann.pomutils.util.VersionFieldType;
+
 /**
  * Persists a selected version from a {@link #delegate} version selector to disk,
  * and returns any valid previously selected version on future invocations.
@@ -111,7 +113,7 @@ public class PersistentVersionSelector implements VersionSelector {
 	}
 
 	@Override
-	public String selectVersion(String projectIdentifier, String ourVersion, String theirVersion) {
+	public String selectVersion(String projectIdentifier, VersionFieldType versionFieldType, String ourVersion, String theirVersion) {
 		try {
 			SelectionState selectionState = readState();
 			
@@ -119,7 +121,7 @@ public class PersistentVersionSelector implements VersionSelector {
 			if (selectionState != null && selectionState.isValidFor(ourVersion, theirVersion)) {
 				selectedVersion = selectionState.getSelectedVersion();
 			} else {
-				selectedVersion = delegate.selectVersion(projectIdentifier, ourVersion, theirVersion);
+				selectedVersion = delegate.selectVersion(projectIdentifier, versionFieldType, ourVersion, theirVersion);
 				writeState(new SelectionState(ourVersion, theirVersion, selectedVersion));
 			}
 			return selectedVersion;

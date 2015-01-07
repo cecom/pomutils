@@ -19,6 +19,10 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
+
 import de.oppermann.pomutils.util.POM;
 
 /**
@@ -29,16 +33,23 @@ import de.oppermann.pomutils.util.POM;
 
 public class PomVersionReplacer {
 
-	private POM pomFile;
+	private final String pomFileAsString;
 
 	public PomVersionReplacer(String pomFileAsString) {
-		pomFile = new POM(pomFileAsString);
+		this.pomFileAsString = pomFileAsString;
 	}
 
 	public void setVersionTo(String newVersion) {
-		pomFile.setParentVersion(newVersion);
-		pomFile.setProjectVersion(newVersion);
-		pomFile.savePom();
+		try {
+			POM pomFile = new POM(pomFileAsString);
+			pomFile.setParentVersion(newVersion);
+			pomFile.setProjectVersion(newVersion);
+			pomFile.savePom();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (XMLStreamException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

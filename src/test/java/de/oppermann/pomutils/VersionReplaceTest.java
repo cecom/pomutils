@@ -20,6 +20,9 @@ package de.oppermann.pomutils;
  */
 
 import java.io.File;
+import java.io.IOException;
+
+import javax.xml.stream.XMLStreamException;
 
 import junit.framework.TestCase;
 
@@ -45,7 +48,7 @@ public class VersionReplaceTest extends TestCase {
 		FileUtils.copyDirectory(new File("src/test/resources/versionReplacer"), testTargetResourceFolder);
 	}
 
-	private POM adjustPomToVersion(String pomToAdjust, String newVersion) {
+	private POM adjustPomToVersion(String pomToAdjust, String newVersion) throws IOException, XMLStreamException {
 		PomVersionReplacer pomVersionReplacer = new PomVersionReplacer(pomToAdjust);
 		pomVersionReplacer.setVersionTo(newVersion);
 

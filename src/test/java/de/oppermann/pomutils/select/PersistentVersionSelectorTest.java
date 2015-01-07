@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import de.oppermann.pomutils.util.VersionFieldType;
+
 public class PersistentVersionSelectorTest {
 
 	@Rule
@@ -40,43 +42,43 @@ public class PersistentVersionSelectorTest {
 	@Test
 	public void testFileDoesNotExist() throws IOException {
 		tempFile.delete();
-		when(delegateSelector.selectVersion("id", "our", "their")).thenReturn("our");
-		assertEquals("our", persistentSelector.selectVersion("id", "our", "their"));
+		when(delegateSelector.selectVersion("id", VersionFieldType.PROJECT, "our", "their")).thenReturn("our");
+		assertEquals("our", persistentSelector.selectVersion("id", VersionFieldType.PROJECT, "our", "their"));
 		
-		assertEquals("our", persistentSelector.selectVersion("id", "our", "their"));
+		assertEquals("our", persistentSelector.selectVersion("id", VersionFieldType.PROJECT, "our", "their"));
 		
-		verify(delegateSelector).selectVersion("id", "our", "their");
+		verify(delegateSelector).selectVersion("id", VersionFieldType.PROJECT, "our", "their");
 	}
 	
 	@Test
 	public void testSkip() throws IOException {
-		assertNull(persistentSelector.selectVersion("id", "our", "their"));
+		assertNull(persistentSelector.selectVersion("id", VersionFieldType.PROJECT, "our", "their"));
 		
-		assertNull(persistentSelector.selectVersion("id", "our", "their"));
+		assertNull(persistentSelector.selectVersion("id", VersionFieldType.PROJECT, "our", "their"));
 		
-		verify(delegateSelector).selectVersion("id", "our", "their");
+		verify(delegateSelector).selectVersion("id", VersionFieldType.PROJECT, "our", "their");
 	}
 	
 	@Test
 	public void testSelect() throws IOException {
-		when(delegateSelector.selectVersion("id", "our", "their")).thenReturn("their");
-		assertEquals("their", persistentSelector.selectVersion("id", "our", "their"));
+		when(delegateSelector.selectVersion("id", VersionFieldType.PARENT, "our", "their")).thenReturn("their");
+		assertEquals("their", persistentSelector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 		
-		assertEquals("their", persistentSelector.selectVersion("id", "our", "their"));
+		assertEquals("their", persistentSelector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 		
-		verify(delegateSelector).selectVersion("id", "our", "their");
+		verify(delegateSelector).selectVersion("id", VersionFieldType.PARENT, "our", "their");
 	}
 	
 	@Test
 	public void testNotValid() throws IOException {
-		when(delegateSelector.selectVersion("id", "our", "their")).thenReturn("their");
-		when(delegateSelector.selectVersion("id", "our2", "their2")).thenReturn("our2");
+		when(delegateSelector.selectVersion("id", VersionFieldType.PARENT, "our", "their")).thenReturn("their");
+		when(delegateSelector.selectVersion("id", VersionFieldType.PARENT, "our2", "their2")).thenReturn("our2");
 		
-		assertEquals("their", persistentSelector.selectVersion("id", "our", "their"));
+		assertEquals("their", persistentSelector.selectVersion("id", VersionFieldType.PARENT, "our", "their"));
 		
-		assertEquals("our2", persistentSelector.selectVersion("id", "our2", "their2"));
+		assertEquals("our2", persistentSelector.selectVersion("id", VersionFieldType.PARENT, "our2", "their2"));
 		
-		verify(delegateSelector).selectVersion("id", "our", "their");
-		verify(delegateSelector).selectVersion("id", "our2", "their2");
+		verify(delegateSelector).selectVersion("id", VersionFieldType.PARENT, "our", "their");
+		verify(delegateSelector).selectVersion("id", VersionFieldType.PARENT, "our2", "their2");
 	}
 }
