@@ -41,8 +41,8 @@ public class StreamVersionSelector implements VersionSelector {
 		out.println("    s) Skip and resolve later");
 		out.println();
 		
-		out.println("If the same conflict is found in other pom files in this merge%n");
-		out.println("or any future merges that occur in the next 2 minutes),%n");
+		out.println("If the same conflict is found in other pom files in this merge");
+		out.println("or any future merges that occur in the next 2 minutes),");
 		out.println("your selection will be used for them as well.");
 		out.println();
 		
@@ -54,7 +54,7 @@ public class StreamVersionSelector implements VersionSelector {
 				String selection = in.readLine();
 				
 				if (selection == null || selection.equalsIgnoreCase("s")) {
-					out.printf("%n");
+					out.println();
 					return null;
 				} else if (selection.trim().equalsIgnoreCase("1") || selection.trim().equals(ourVersion)) {
 					return ourVersion;
