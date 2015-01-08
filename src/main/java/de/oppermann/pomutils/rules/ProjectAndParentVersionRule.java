@@ -1,11 +1,5 @@
 package de.oppermann.pomutils.rules;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.stream.XMLStreamException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,29 +47,11 @@ public class ProjectAndParentVersionRule extends AbstractRule {
 
 	@Override
 	public void evaluate(POM basePom, POM ourPom, POM theirPom) {
-		try {
-			List<POM> adjustedPoms = new ArrayList<POM>();
-
-			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PROJECT));
-			addIfNotNull(adjustedPoms, adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PARENT));
-
-			for (POM adjustedPom : adjustedPoms) {
-				adjustedPom.savePom();
-			}
-		} catch (IOException e) {
-			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
-		} catch (XMLStreamException e) {
-			logger.warn("Exception when attempting to merge pom versions.  Falling back to default merge.", e);
-		}
+		adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PROJECT);
+		adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PARENT);
 	}
 
-	private void addIfNotNull(List<POM> adjustedPoms, POM adjustedPom) {
-		if (adjustedPom != null) {
-			adjustedPoms.add(adjustedPom);
-		}
-	}
-
-	private POM adjustVersion(POM basePom, POM ourPom, POM theirPom, VersionFieldType versionFieldType) {
+	private void adjustVersion(POM basePom, POM ourPom, POM theirPom, VersionFieldType versionFieldType) {
 		String baseVersion = versionFieldType.get(basePom);
 		String ourVersion = versionFieldType.get(ourPom);
 		String theirVersion = versionFieldType.get(theirPom);
@@ -112,9 +88,7 @@ public class ProjectAndParentVersionRule extends AbstractRule {
 				        : ourPom;
 
 				versionFieldType.set(pomToAdjust, newVersion);
-				return pomToAdjust;
 			}
 		}
-		return null;
 	}
 }

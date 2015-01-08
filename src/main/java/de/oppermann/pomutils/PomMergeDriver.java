@@ -28,7 +28,6 @@ import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.oppermann.pomutils.rules.Rule;
 import de.oppermann.pomutils.rules.Ruleset;
 import de.oppermann.pomutils.util.POM;
 
@@ -60,9 +59,7 @@ public class PomMergeDriver {
 			POM ourPom = new POM(ourPomFile);
 			POM theirPom = new POM(theirPomFile);
 
-			for (Rule rule : ruleset.getRules()) {
-				rule.evaluate(basePom, ourPom, theirPom);
-			}
+			ruleset.evaluate(basePom, ourPom, theirPom);
 
 			basePom.savePom();
 			theirPom.savePom();

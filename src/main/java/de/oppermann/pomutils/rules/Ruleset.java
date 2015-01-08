@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.yaml.snakeyaml.Yaml;
 
 import de.oppermann.pomutils.select.SelectionStrategy;
+import de.oppermann.pomutils.util.POM;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -38,7 +41,7 @@ import de.oppermann.pomutils.select.SelectionStrategy;
 
 public class Ruleset {
 
-	List<Rule> rules = new ArrayList<Rule>();
+	private List<Rule> rules = new ArrayList<Rule>();
 
 	/**
 	 * Creates the default Ruleset with the ProjectAndParentVersionRule.
@@ -74,8 +77,10 @@ public class Ruleset {
 		}
 	}
 
-	public List<Rule> getRules() {
-		return rules;
+	public void evaluate(POM basePom, POM ourPom, POM theirPom) throws IOException, XMLStreamException {
+		for (Rule rule : rules) {
+			rule.evaluate(basePom, ourPom, theirPom);
+		}
 	}
 
 }
