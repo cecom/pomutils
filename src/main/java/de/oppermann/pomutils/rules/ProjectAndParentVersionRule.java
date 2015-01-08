@@ -38,31 +38,17 @@ import de.oppermann.pomutils.util.VersionFieldType;
  * 
  */
 
-public class ProjectAndParentVersionRule implements Rule {
+public class ProjectAndParentVersionRule extends AbstractRule {
 
 	private final Logger logger = LoggerFactory.getLogger(ProjectAndParentVersionRule.class);
-
-	private SelectionStrategy strategy;
 
 	public ProjectAndParentVersionRule() {
 		// for creating this instance via snakeyaml
 	}
 
 	public ProjectAndParentVersionRule(SelectionStrategy strategy) {
-		this.strategy = strategy;
+		super(strategy);
 		logger.debug("Using ProjectAndParentVersionRule with strategy [{}]", strategy.toString());
-	}
-
-	public SelectionStrategy getStrategy() {
-		return strategy;
-	}
-
-	public void setStrategy(SelectionStrategy strategy) {
-		this.strategy = strategy;
-	}
-
-	public void setStrategy(String strategy) {
-		this.strategy = SelectionStrategy.valueOf(strategy.toUpperCase());
 	}
 
 	@Override
@@ -109,7 +95,7 @@ public class ProjectAndParentVersionRule implements Rule {
 				/*
 				 * Both our version and their version have changed from the base, so conflict.
 				 */
-				newVersion = strategy.getSelector().selectVersion(
+				newVersion = getStrategy().getSelector().selectVersion(
 				        ourPom.getProjectIdentifier(),
 				        versionFieldType,
 				        ourVersion,

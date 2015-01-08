@@ -37,11 +37,10 @@ import de.oppermann.pomutils.util.POM;
  * 
  */
 
-public class PropertyRule implements Rule {
+public class PropertyRule extends AbstractRule {
 
 	private final Logger logger = LoggerFactory.getLogger(PropertyRule.class);
 
-	private SelectionStrategy strategy;
 	private List<String> properties;
 
 	public PropertyRule() {
@@ -49,21 +48,9 @@ public class PropertyRule implements Rule {
 	}
 
 	public PropertyRule(SelectionStrategy strategy, List<String> properties) {
-		this.strategy = strategy;
+		super(strategy);
 		this.properties = properties;
 		logger.debug("Using ProjectAndParentVersionRule with strategy [{}] for properies []", strategy.toString(), Arrays.toString(properties.toArray()));
-	}
-
-	public SelectionStrategy getStrategy() {
-		return strategy;
-	}
-
-	public void setStrategy(SelectionStrategy strategy) {
-		this.strategy = strategy;
-	}
-
-	public void setStrategy(String strategy) {
-		this.strategy = SelectionStrategy.valueOf(strategy.toUpperCase());
 	}
 
 	public List<String> getProperties() {
@@ -81,7 +68,7 @@ public class PropertyRule implements Rule {
 
 			POM adjustPom = null;
 			POM withValueOfPom = null;
-			switch (strategy) {
+			switch (getStrategy()) {
 				case OUR:
 					adjustPom = theirPom;
 					withValueOfPom = ourPom;
@@ -91,7 +78,7 @@ public class PropertyRule implements Rule {
 					withValueOfPom = theirPom;
 					break;
 				default:
-					throw new IllegalArgumentException("Strategy [" + strategy.toString() + "] not implemented.");
+					throw new IllegalArgumentException("Strategy [" + getStrategy().toString() + "] not implemented.");
 			}
 
 			adjustPom.setPropertyToValue(property, withValueOfPom.getProperties().getProperty(property));
