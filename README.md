@@ -40,7 +40,7 @@ Usage: <main class> [options] [command] [command options]
        Used to print this information.
        Default: false
   Commands:
-    merge      Used as merge driver in git.  Updates the version of 'our' pom or 'their' pom (based on the value of --select), and then does a normal 'git merge-file'
+    merge       Used as merge driver in git.  Updates the version of 'our' pom or 'their' pom (based on the value of --select), and then does a normal 'git merge-file'
       Usage: merge [options]
         Options:
         * -b, --base
@@ -54,6 +54,9 @@ Usage: <main class> [options] [command] [command options]
              'prompt'.  If 'prompt' is specified, then you will be prompted via
              stdout/stdin to select a version.
              Default: our
+          -r, --ruleset
+             The ruleset to use when you merge poms. If you don't specify a ruleset,
+             a default ruleset will be used. Default is ProjectAndParentVersionRule with our strategy.
 
     replace      Updates the parent version and/or the project version in the given pom.xml
       Usage: replace [options]
@@ -101,6 +104,46 @@ Internally, the merge driver will adjust the parent/project version
 of either *their* pom.xml file or *our* pom.xml file (depending on the value of `--select`),
 then run the `git merge-file` command (which is used by the default merge driver).
 
+*merge* Command *ADVANCED* Usage
+------------
+
+It is also possible to write your own *Rule* for conflict resolution. Currently there are two
+implemented rules:
+
+  - de.oppermann.pomutils.rules.ProjectAndParentVersionRule
+  - de.oppermann.pomutils.rules.PropertyRule
+
+If you don't specify `--ruleset` on command line the *de.oppermann.pomutils.rules.ProjectAndParentVersionRule*
+rule is used. But if you want e.g. to resolve conflicts on maven properties too, or want
+to evaluate your own rule, you have to create a ruleset configuration file. This file looks like (yaml format):
+
+    --- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
+    strategy: OUR                     # possible values: OUR|THEIR|PROMPT
+                                      # resolves all parent and project version conflicts, using the given strategy
+    --- !!de.oppermann.pomutils.rules.PropertyRule
+    strategy  : OUR                   # possible values: OUR|THEIR
+    properties:                       # the given properties will be resolved, using the given strategy
+         - jdbc.user.name
+         - foobar.version
+
+Basically you define the rules which should be used by adding the implementation class of the rule with *--- !!*,
+followed by the configuration. If you want to write your own rule, have a
+look at the implemented ones and send a pull request to merge it ;-)
+
+If you would use this example configuration file, it would result in:
+
+- automatic project and parent version conflict resolution using the *our* pom version
+- automatic conflict resolution for the two properties *jdbc.user.name*, *foobar.version* using the *our* property value in the global section of the pom and/or in the profile property section.
+
+Currently im working on a third ruleset where version conflicts in dependencies can be resolved.
+
+After you wrote your ruleset configuration file, add it to your git project *somewhere* and change in your `.git/config` the `driver` entry. e.g.
+
+```
+[merge "pom"]
+     name = Automatically resolve project and/or parent version and properties in pom files. The rest is a normal merge.
+     driver = java -jar <pathToJar>/pomutils-X.X.jar merge --base=%O --our=%A --their=%B --ruleset=.pomutilsMergeRuleset
+```
 
 *replace* Command Usage
 ------------

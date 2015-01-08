@@ -1,14 +1,16 @@
 --- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
-strategy: OUR # possible values: OUR|THEIR|PROMPT
+strategy: OUR                     # possible values: OUR|THEIR|PROMPT
+                                  # resolves all parent and project version conflicts, using the given strategy
 
 --- !!de.oppermann.pomutils.rules.PropertyRule
 strategy  : OUR                   # possible values: OUR|THEIR
-properties:                       # a list of property names
-            - jdbc.user.name
-            - foobar.version
+properties:                       # the given properties will be resolved, using the given strategy
+    - jdbc.user.name
+    - foobar.version
 
 --- !!de.oppermann.pomutils.rules.DependencyVersionRule
-strategy: OUR                     # possible values: OUR|THEIR
+strategy: OUR                      # possible values: OUR|THEIR
+                                   # this rule isn't implemented. I'm working on this.
 groupIds:
    - de.oppermann.pomutils:        # all dependencies which have as groupId de.oppermann.pomutils will have automatic version resolution
    - org.codehaus.mojo:            # all dependencies which have as groupId org.codehaus.mojo

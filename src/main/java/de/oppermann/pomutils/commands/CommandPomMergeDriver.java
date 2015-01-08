@@ -48,7 +48,7 @@ public class CommandPomMergeDriver {
 	@Parameter(names = { "-s", "--select" }, description = "Which version to select to resolve conflicts.  'our', 'their', or 'prompt'.  If 'prompt' is specified, then you will be prompted via stdout/stdin to select a version.", required = false, converter = SelectionStrategyConverter.class)
 	private SelectionStrategy selectionStrategy = SelectionStrategy.OUR;
 
-	@Parameter(names = { "-r", "--ruleset" }, description = "The ruleset to use when you merge poms. If not given only parent/project version is evaluated.")
+	@Parameter(names = { "-r", "--ruleset" }, description = "The ruleset to use when you merge poms. If you don't specify a ruleset, a default ruleset will be used. Default is ProjectAndParentVersionRule with our strategy.")
 	private File ruleSetfile;
 
 	public String getBasePom() {
