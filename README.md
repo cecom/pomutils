@@ -119,25 +119,20 @@ to evaluate your own rule, you have to create a ruleset configuration file. This
 
     --- !!de.oppermann.pomutils.rules.ProjectAndParentVersionRule
     strategy: OUR                     # possible values: OUR|THEIR|PROMPT
-                                      # resolves all parent and project version conflicts, using the given strategy
+                                      # resolves all parent and project version conflicts, using the *OUR* strategy
     --- !!de.oppermann.pomutils.rules.PropertyRule
     strategy  : OUR                   # possible values: OUR|THEIR
-    properties:                       # the given properties will be resolved, using the given strategy
+    properties:                       # resolves the two given properties in the global and profile property section, using the *OUR* strategy
          - jdbc.user.name
          - foobar.version
 
 Basically you define the rules which should be used by adding the implementation class of the rule with *--- !!*,
-followed by the configuration. If you want to write your own rule, have a
-look at the implemented ones and send a pull request to merge it ;-)
-
-If you would use this example configuration file, it would result in:
-
-- automatic project and parent version conflict resolution using the *our* pom version
-- automatic conflict resolution for the two properties *jdbc.user.name*, *foobar.version* using the *our* property value in the global section of the pom and/or in the profile property section.
+followed by the configuration. If you want to write your own rule, have a look at the implemented ones and perhaps send
+a pull request to merge it ;-)
 
 Currently im working on a third ruleset where version conflicts in dependencies can be resolved.
 
-After you wrote your ruleset configuration file, add it to your git project *somewhere* and change in your `.git/config` the `driver` entry. e.g.
+After you wrote your ruleset configuration file, add it to your git project *somewhere* and change the `driver` entry in your `.git/config`, e.g.:
 
 ```
 [merge "pom"]
