@@ -50,7 +50,7 @@ public class PropertyRule extends AbstractRule {
 	public PropertyRule(SelectionStrategy strategy, List<String> properties) {
 		super(strategy);
 		this.properties = properties;
-		logger.debug("Using ProjectAndParentVersionRule with strategy [{}] for properies []", strategy.toString(), Arrays.toString(properties.toArray()));
+		logger.debug("Using ProjectAndParentVersionRule with strategy [{}] for properties [{}]", strategy.toString(), Arrays.toString(properties.toArray()));
 	}
 
 	public List<String> getProperties() {
@@ -86,8 +86,5 @@ public class PropertyRule extends AbstractRule {
 				adjustPom.setPropertyToValue(profile.getId(), property, withValueOfPom.getProfileProperty(profile.getId(), property));
 			}
 		}
-
-		theirPom.savePom();
-		ourPom.savePom();
 	}
 }

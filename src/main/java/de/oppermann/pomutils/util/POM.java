@@ -232,7 +232,7 @@ public class POM {
 
 	public void setPropertyToValue(String profileId, String property, String newPropertyValue) throws XMLStreamException, IOException {
 		if (property == null) {
-			logger.debug("Property [{}] is null, nothing to do.");
+			logger.debug("Property is null, nothing to do.");
 			return;
 		}
 		if (newPropertyValue == null) {
