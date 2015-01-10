@@ -130,7 +130,7 @@ Basically you define the rules which should be used by adding the implementation
 followed by the configuration. If you want to write your own rule, have a look at the implemented ones and perhaps send
 a pull request to merge it ;-)
 
-Currently im working on a third ruleset where version conflicts in dependencies can be resolved.
+Currently im working on a third rule where version conflicts in dependencies can be resolved.
 
 After you wrote your ruleset configuration file, add it to your git project *somewhere* and change the `driver` entry in your `.git/config`, e.g.:
 
