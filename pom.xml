@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.oppermann.pomutils</groupId>
     <artifactId>pomutils</artifactId>
-    <version>master</version>
+    <version>develop</version>
 
     <licenses>
         <license>
