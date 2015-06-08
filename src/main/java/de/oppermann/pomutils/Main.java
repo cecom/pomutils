@@ -19,6 +19,7 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
@@ -43,7 +44,14 @@ public class Main {
 	private static Logger logger = null;
 
 	public static void main(String... args) {
-		int resultValue = mainInternal(args);
+		int resultValue = 0;
+		try {
+			resultValue = mainInternal(args);
+		} catch (Exception e) {
+			System.err.println("We got an exception on merge: " + StringUtils.join(args, " "));
+			e.printStackTrace();
+			System.exit(1);
+		}
 		logger.debug("Exiting with exit code {}", resultValue);
 		System.exit(resultValue);
 	}
@@ -84,7 +92,8 @@ public class Main {
 	}
 
 	private static int executePomMergeDriver(CommandPomMergeDriver mergeCommand) {
-		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getRuleSet(), mergeCommand.getBasePom(), mergeCommand.getOurPom(),
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getRuleSet(), mergeCommand.getBasePom(),
+		        mergeCommand.getOurPom(),
 		        mergeCommand.getTheirPom());
 		return pomMergeDriver.merge();
 	}

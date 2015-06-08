@@ -219,7 +219,7 @@ public class POM {
 				return profile.getProperties();
 			}
 		}
-		throw new IllegalArgumentException("profile [" + profileId + "] not found");
+		return new Properties();
 	}
 
 	public Properties getProperties() {
