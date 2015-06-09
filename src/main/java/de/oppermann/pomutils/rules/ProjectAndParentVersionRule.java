@@ -3,8 +3,9 @@ package de.oppermann.pomutils.rules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.oppermann.pomutils.model.PomModel;
 import de.oppermann.pomutils.select.SelectionStrategy;
-import de.oppermann.pomutils.util.POM;
+import de.oppermann.pomutils.util.PomUtils;
 import de.oppermann.pomutils.util.VersionFieldType;
 
 /*
@@ -46,12 +47,12 @@ public class ProjectAndParentVersionRule extends AbstractRule {
 	}
 
 	@Override
-	public void evaluate(POM basePom, POM ourPom, POM theirPom) {
+	public void evaluate(PomModel basePom, PomModel ourPom, PomModel theirPom) {
 		adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PROJECT);
 		adjustVersion(basePom, ourPom, theirPom, VersionFieldType.PARENT);
 	}
 
-	private void adjustVersion(POM basePom, POM ourPom, POM theirPom, VersionFieldType versionFieldType) {
+	private void adjustVersion(PomModel basePom, PomModel ourPom, PomModel theirPom, VersionFieldType versionFieldType) {
 		String baseVersion = versionFieldType.get(basePom);
 		String ourVersion = versionFieldType.get(ourPom);
 		String theirVersion = versionFieldType.get(theirPom);
@@ -72,7 +73,7 @@ public class ProjectAndParentVersionRule extends AbstractRule {
 				 * Both our version and their version have changed from the base, so conflict.
 				 */
 				newVersion = getStrategy().getSelector().selectVersion(
-				        ourPom.getProjectIdentifier(),
+				        PomUtils.calculateProjectIdentifier(ourPom),
 				        versionFieldType,
 				        ourVersion,
 				        theirVersion);
@@ -83,7 +84,7 @@ public class ProjectAndParentVersionRule extends AbstractRule {
 				 * newVersion can be null if the user wants to skip resolution.
 				 */
 
-				POM pomToAdjust = newVersion.equals(ourVersion)
+				PomModel pomToAdjust = newVersion.equals(ourVersion)
 				        ? theirPom
 				        : ourPom;
 

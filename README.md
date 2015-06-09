@@ -1,3 +1,7 @@
+TODO: 
+  - newlines are \n\r but should be git dependent. in our case \n only
+
+
 POMUtils
 =============
 

@@ -3,8 +3,11 @@ package de.oppermann.pomutils;
 import java.io.File;
 
 import junit.framework.TestCase;
+
+import org.xmlbeam.XBProjector;
+
+import de.oppermann.pomutils.model.PomModel;
 import de.oppermann.pomutils.rules.Ruleset;
-import de.oppermann.pomutils.util.POM;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,10 +35,14 @@ import de.oppermann.pomutils.util.POM;
  */
 public class RulesetTest extends TestCase {
 
+	private XBProjector xbProjector;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
+
+		xbProjector = TestUtils.createXBProjector();
 	}
 
 	public void testProjectAndParentVersionWithOurStrategy() throws Exception {
@@ -48,18 +55,20 @@ public class RulesetTest extends TestCase {
 		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
-		String versionBeforeMerge = new POM(ourPomFile).getProjectVersion();
+		String versionBeforeMerge = xbProjector.io().file(ourPomFile).read(PomModel.class).getProjectArtifact()
+		        .getVersion();
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("same version now", ourPom.getProjectVersion(), theirPom.getProjectVersion());
-		assertEquals("our version should win", versionBeforeMerge, ourPom.getProjectVersion());
+		assertEquals("same version now", ourPom.getProjectArtifact().getVersion(), theirPom.getProjectArtifact()
+		        .getVersion());
+		assertEquals("our version should win", versionBeforeMerge, ourPom.getProjectArtifact().getVersion());
 	}
 
 	public void testProjectAndParentVersionWithTheirsStrategy() throws Exception {
@@ -72,18 +81,20 @@ public class RulesetTest extends TestCase {
 		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
-		String versionBeforeMerge = new POM(theirPomFile).getProjectVersion();
+		String versionBeforeMerge = xbProjector.io().file(theirPomFile).read(PomModel.class).getProjectArtifact()
+		        .getVersion();
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("same version now", ourPom.getProjectVersion(), theirPom.getProjectVersion());
-		assertEquals("their version should win", versionBeforeMerge, ourPom.getProjectVersion());
+		assertEquals("same version now", ourPom.getProjectArtifact().getVersion(), theirPom.getProjectArtifact()
+		        .getVersion());
+		assertEquals("their version should win", versionBeforeMerge, ourPom.getProjectArtifact().getVersion());
 	}
 
 	private int doMerge(Ruleset ruleset, String basePomFile, String ourPomFile, String theirPomFile) {
@@ -101,30 +112,38 @@ public class RulesetTest extends TestCase {
 		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
-		String foobarPropertyExpectedResult = new POM(ourPomFile).getProperties().getProperty("foobar");
-		String jdbcBaseUrlExpectedResult = new POM(ourPomFile).getProperties().getProperty("jdbc.base.url");
+		PomModel ourPomBeforeMerge = xbProjector.io().file(ourPomFile).read(PomModel.class);
+
+		String foobarPropertyExpectedResult = ourPomBeforeMerge.getPropertyValue("foobar");
+		String jdbcBaseUrlExpectedResult = ourPomBeforeMerge.getPropertyValue("jdbc.base.url");
+
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("<foobar> property same content now", ourPom.getProperties().getProperty("foobar"), theirPom.getProperties().getProperty("foobar"));
-		assertEquals("<jdbc.base.url> property same content now", ourPom.getProperties().getProperty("jdbc.base.url"),
-		        theirPom.getProperties().getProperty("jdbc.base.url"));
-		assertEquals("our version of <foobar> should win", foobarPropertyExpectedResult, ourPom.getProperties().getProperty("foobar"));
-		assertEquals("our version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult, ourPom.getProperties().getProperty("jdbc.base.url"));
+		assertEquals("<foobar> property same content now", ourPom.getPropertyValue("foobar"), theirPom
+		        .getPropertyValue("foobar"));
+		assertEquals("<jdbc.base.url> property same content now", ourPom.getPropertyValue("jdbc.base.url"),
+		        theirPom.getPropertyValue("jdbc.base.url"));
+		assertEquals("our version of <foobar> should win", foobarPropertyExpectedResult,
+		        ourPom.getPropertyValue("foobar"));
+		assertEquals("our version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult,
+		        ourPom.getPropertyValue("jdbc.base.url"));
 
-		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfileProperties("develop").getProperty("foobar"));
-		assertEquals("property <foobar> in profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery").getProperty("foobar"));
+		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfile("develop")
+		        .getPropertyValue("foobar"));
+		assertEquals("property <foobar> in profile <delivery> should be empty", "",
+		        ourPom.getProfile("delivery").getPropertyValue("foobar"));
 
-		assertEquals("our version of <jdbc.base.url> in profile <develop> should win", jdbcBaseUrlExpectedResult, ourPom.getProfileProperties("develop")
-		        .getProperty("jdbc.base.url"));
-		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery")
-		        .getProperty("jdbc.base.url"));
+		assertEquals("our version of <jdbc.base.url> in profile <develop> should win", jdbcBaseUrlExpectedResult,
+		        ourPom.getProfile("develop").getPropertyValue("jdbc.base.url"));
+		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "",
+		        ourPom.getProfile("delivery").getPropertyValue("jdbc.base.url"));
 	}
 
 	public void testPropertyRuleWithTheirStrategy() throws Exception {
@@ -137,30 +156,38 @@ public class RulesetTest extends TestCase {
 		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
-		String foobarPropertyExpectedResult = new POM(theirPomFile).getProperties().getProperty("foobar");
-		String jdbcBaseUrlExpectedResult = new POM(theirPomFile).getProperties().getProperty("jdbc.base.url");
+		PomModel theirPomBeforeMerge = xbProjector.io().file(theirPomFile).read(PomModel.class);
+
+		String foobarPropertyExpectedResult = theirPomBeforeMerge.getPropertyValue("foobar");
+		String jdbcBaseUrlExpectedResult = theirPomBeforeMerge.getPropertyValue("jdbc.base.url");
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("<foobar> property same content now", theirPom.getProperties().getProperty("foobar"), ourPom.getProperties().getProperty("foobar"));
+		assertEquals("<foobar> property same content now", theirPom.getPropertyValue("foobar"),
+		        ourPom.getPropertyValue("foobar"));
 		assertEquals("<jdbc.base.url> property same content now",
-		        theirPom.getProperties().getProperty("jdbc.base.url"), ourPom.getProperties().getProperty("jdbc.base.url"));
-		assertEquals("their version of <foobar> should win", foobarPropertyExpectedResult, ourPom.getProperties().getProperty("foobar"));
-		assertEquals("their version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult, ourPom.getProperties().getProperty("jdbc.base.url"));
+		        theirPom.getPropertyValue("jdbc.base.url"),
+		        ourPom.getPropertyValue("jdbc.base.url"));
+		assertEquals("their version of <foobar> should win", foobarPropertyExpectedResult,
+		        ourPom.getPropertyValue("foobar"));
+		assertEquals("their version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult,
+		        ourPom.getPropertyValue("jdbc.base.url"));
 
-		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfileProperties("develop").getProperty("foobar"));
-		assertEquals("property <foobar> in profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery").getProperty("foobar"));
+		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfile("develop")
+		        .getPropertyValue("foobar"));
+		assertEquals("property <foobar> in profile <delivery> should be empty", "",
+		        ourPom.getProfile("delivery").getPropertyValue("foobar"));
 
-		assertEquals("their version of <jdbc.base.url> in profile <develop> should win", jdbcBaseUrlExpectedResult, ourPom.getProfileProperties("develop")
-		        .getProperty("jdbc.base.url"));
-		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery")
-		        .getProperty("jdbc.base.url"));
+		assertEquals("their version of <jdbc.base.url> in profile <develop> should win", jdbcBaseUrlExpectedResult,
+		        ourPom.getProfile("develop").getPropertyValue("jdbc.base.url"));
+		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "",
+		        ourPom.getProfile("delivery").getPropertyValue("jdbc.base.url"));
 	}
 
 }

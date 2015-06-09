@@ -19,19 +19,13 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
-import java.io.File;
-
 import junit.framework.TestCase;
 
-import org.apache.commons.io.FileUtils;
-import org.codehaus.mojo.versions.api.PomHelper;
-import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
+import org.xmlbeam.XBProjector;
 
-import com.ctc.wstx.stax.WstxInputFactory;
-
+import de.oppermann.pomutils.model.PomModel;
 import de.oppermann.pomutils.rules.Ruleset;
 import de.oppermann.pomutils.select.SelectionStrategy;
-import de.oppermann.pomutils.util.POM;
 
 /**
  * 
@@ -41,10 +35,14 @@ import de.oppermann.pomutils.util.POM;
 
 public class PomMergeDriverTest extends TestCase {
 
+	private XBProjector xbProjector;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "ERROR");
+
+		xbProjector = TestUtils.createXBProjector();
 	}
 
 	public void testAutoMergeSucceded() throws Exception {
@@ -63,14 +61,16 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("our", ourPom.getProjectVersion());
-		assertEquals("our", theirPom.getProjectVersion());
+		assertEquals("our", ourPom.getProjectArtifact().getVersion());
+		assertEquals("our", theirPom.getProjectArtifact().getVersion());
 
-		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
-		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		String theirDependecyVersoin = xbProjector.io().file(theirPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
+		String ourDependencyVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
 
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
@@ -91,16 +91,19 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("their", ourPom.getProjectVersion());
-		assertEquals("their", theirPom.getProjectVersion());
+		assertEquals("their", ourPom.getProjectArtifact().getVersion());
+		assertEquals("their", theirPom.getProjectArtifact().getVersion());
 
-		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
-		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		String theirDependecyVersion = xbProjector.io().file(theirPomFile).read(PomModel.class).getDependencies()
+		        .get(0)
+		        .getVersion();
+		String ourDependencyVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
 
-		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
+		assertEquals("dependency version change merged", theirDependecyVersion, ourDependencyVersion);
 	}
 
 	public void testAutoMergeSucceded_noConflict_our() throws Exception {
@@ -119,14 +122,17 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("our", ourPom.getProjectVersion());
-		assertEquals("our", theirPom.getProjectVersion());
+		assertEquals("our", ourPom.getProjectArtifact().getVersion());
+		assertEquals("our", theirPom.getProjectArtifact().getVersion());
 
-		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
-		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		String theirDependecyVersoin = xbProjector.io().file(theirPomFile).read(PomModel.class).getDependencies()
+		        .get(0)
+		        .getVersion();
+		String ourDependencyVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
 
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
@@ -147,14 +153,17 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
 
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("their", ourPom.getProjectVersion());
-		assertEquals("their", theirPom.getProjectVersion());
+		assertEquals("their", ourPom.getProjectArtifact().getVersion());
+		assertEquals("their", theirPom.getProjectArtifact().getVersion());
 
-		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
-		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		String theirDependecyVersoin = xbProjector.io().file(theirPomFile).read(PomModel.class).getDependencies()
+		        .get(0)
+		        .getVersion();
+		String ourDependencyVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
 
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
@@ -174,14 +183,17 @@ public class PomMergeDriverTest extends TestCase {
 		int mergeReturnValue = pomMergeDriver.merge();
 
 		assertTrue("merge succeeded", mergeReturnValue == 0);
-		POM theirPom = new POM(theirPomFile);
-		POM ourPom = new POM(ourPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
+		PomModel ourPom = xbProjector.io().file(ourPomFile).read(PomModel.class);
 
-		assertEquals("their", ourPom.getParentVersion());
-		assertEquals("their", theirPom.getParentVersion());
+		assertEquals("their", ourPom.getParentArtifact().getVersion());
+		assertEquals("their", theirPom.getParentArtifact().getVersion());
 
-		String theirDependecyVersoin = PomHelper.getRawModel(new File(theirPomFile)).getDependencies().get(0).getVersion();
-		String ourDependencyVersion = PomHelper.getRawModel(new File(ourPomFile)).getDependencies().get(0).getVersion();
+		String theirDependecyVersoin = xbProjector.io().file(theirPomFile).read(PomModel.class).getDependencies()
+		        .get(0)
+		        .getVersion();
+		String ourDependencyVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getDependencies()
+		        .get(0).getVersion();
 
 		assertEquals("dependency version change merged", theirDependecyVersoin, ourDependencyVersion);
 	}
@@ -195,6 +207,9 @@ public class PomMergeDriverTest extends TestCase {
 		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
+		String ourProjectVersion = xbProjector.io().file(ourPomFile).read(PomModel.class).getProjectArtifact()
+		        .getVersion();
+
 		Ruleset ruleset = new Ruleset(SelectionStrategy.OUR);
 
 		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
@@ -202,11 +217,8 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertTrue("merge conflict", mergeReturnValue == 1);
 
-		POM theirPom = new POM(theirPomFile);
+		PomModel theirPom = xbProjector.io().file(theirPomFile).read(PomModel.class);
 
-		StringBuilder ourPomString = new StringBuilder(FileUtils.readFileToString(new File(ourPomFile)));
-		String ourProjectVersion = PomHelper.getProjectVersion(new ModifiedPomXMLEventReader(ourPomString, new WstxInputFactory()));
-
-		assertEquals("same version now", ourProjectVersion, theirPom.getProjectVersion());
+		assertEquals("same version now", ourProjectVersion, theirPom.getProjectArtifact().getVersion());
 	}
 }

@@ -19,7 +19,8 @@ package de.oppermann.pomutils;
  * under the License.
  */
 
-import org.apache.commons.lang.StringUtils;
+import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
@@ -48,7 +49,7 @@ public class Main {
 		try {
 			resultValue = mainInternal(args);
 		} catch (Exception e) {
-			System.err.println("We got an exception on merge: " + StringUtils.join(args, " "));
+			System.err.println("We got an exception on merge: " + Arrays.toString(args));
 			e.printStackTrace();
 			System.exit(1);
 		}

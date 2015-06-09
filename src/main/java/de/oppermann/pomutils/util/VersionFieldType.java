@@ -1,35 +1,43 @@
 package de.oppermann.pomutils.util;
 
+import de.oppermann.pomutils.model.PomModel;
+
 /**
  * Type of version field.
  */
 public enum VersionFieldType {
 	PROJECT {
 		@Override
-		public String get(POM pom) {
-			return pom.getProjectVersion();
+		public String get(PomModel pom) {
+			if (pom.getProjectArtifact() == null) {
+				return null;
+			}
+			return pom.getProjectArtifact().getVersion();
 		}
 
 		@Override
-		public void set(POM pom, String newVersion) {
-			pom.setProjectVersion(newVersion);
+		public void set(PomModel pom, String newVersion) {
+			pom.getProjectArtifact().setVersion(newVersion);
 		}
 
 	},
 	PARENT {
 		@Override
-		public String get(POM pom) {
-			return pom.getParentVersion();
+		public String get(PomModel pom) {
+			if (pom.getParentArtifact() == null) {
+				return null;
+			}
+			return pom.getParentArtifact().getVersion();
 		}
 
 		@Override
-		public void set(POM pom, String newVersion) {
-			pom.setParentVersion(newVersion);
+		public void set(PomModel pom, String newVersion) {
+			pom.getParentArtifact().setVersion(newVersion);
 		}
 
 	};
 
-	public abstract String get(POM pom);
+	public abstract String get(PomModel pom);
 
-	public abstract void set(POM pom, String newVersion);
+	public abstract void set(PomModel pom, String newVersion);
 }

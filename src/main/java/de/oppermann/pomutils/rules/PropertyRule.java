@@ -18,18 +18,16 @@ package de.oppermann.pomutils.rules;
  * specific language governing permissions and limitations
  * under the License.
  */
-import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.maven.model.Profile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.oppermann.pomutils.model.PomModel;
+import de.oppermann.pomutils.model.PomModel.Profile;
 import de.oppermann.pomutils.select.SelectionStrategy;
-import de.oppermann.pomutils.util.POM;
 
 /**
  * 
@@ -50,7 +48,8 @@ public class PropertyRule extends AbstractRule {
 	public PropertyRule(SelectionStrategy strategy, List<String> properties) {
 		super(strategy);
 		this.properties = properties;
-		logger.debug("Using ProjectAndParentVersionRule with strategy [{}] for properties [{}]", strategy.toString(), Arrays.toString(properties.toArray()));
+		logger.debug("Using ProjectAndParentVersionRule with strategy [{}] for properties [{}]", strategy.toString(),
+		        Arrays.toString(properties.toArray()));
 	}
 
 	public List<String> getProperties() {
@@ -62,12 +61,12 @@ public class PropertyRule extends AbstractRule {
 	}
 
 	@Override
-	public void evaluate(POM basePom, POM ourPom, POM theirPom) throws IOException, XMLStreamException {
+	public void evaluate(PomModel basePom, PomModel ourPom, PomModel theirPom) {
 		for (String property : getProperties()) {
 			logger.debug("Process property [{}]", property);
 
-			POM adjustPom = null;
-			POM withValueOfPom = null;
+			PomModel adjustPom = null;
+			PomModel withValueOfPom = null;
 			switch (getStrategy()) {
 				case OUR:
 					adjustPom = theirPom;
@@ -81,9 +80,16 @@ public class PropertyRule extends AbstractRule {
 					throw new IllegalArgumentException("Strategy [" + getStrategy().toString() + "] not implemented.");
 			}
 
-			adjustPom.setPropertyToValue(property, withValueOfPom.getProperties().getProperty(property));
+			if (adjustPom.propertyExist(property)) {
+				adjustPom.setPropertyValue(property, withValueOfPom.getPropertyValue(property));
+			}
+
 			for (Profile profile : adjustPom.getProfiles()) {
-				adjustPom.setPropertyToValue(profile.getId(), property, withValueOfPom.getProfileProperty(profile.getId(), property));
+				if (!profile.propertyExist(property)) {
+					continue;
+				}
+				String newValue = withValueOfPom.getProfile(profile.getId()).getPropertyValue(property);
+				profile.setPropertyValue(property, newValue);
 			}
 		}
 	}

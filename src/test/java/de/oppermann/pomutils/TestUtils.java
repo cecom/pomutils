@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.xmlbeam.XBProjector;
+import org.xmlbeam.config.DefaultXMLFactoriesConfig;
+import org.xmlbeam.config.DefaultXMLFactoriesConfig.NamespacePhilosophy;
 
 /**
  * 
@@ -38,6 +41,13 @@ public class TestUtils {
 		File targetFolderFile = new File(targetFolder);
 		FileUtils.deleteDirectory(targetFolderFile);
 		FileUtils.copyDirectory(new File("src/test/resources/" + subFolder), targetFolderFile);
+	}
+
+	public static XBProjector createXBProjector() {
+		XBProjector xbProjector = new XBProjector();
+		xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
+
+		return xbProjector;
 	}
 
 }

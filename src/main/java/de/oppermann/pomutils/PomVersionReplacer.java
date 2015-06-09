@@ -21,9 +21,11 @@ package de.oppermann.pomutils;
 
 import java.io.IOException;
 
-import javax.xml.stream.XMLStreamException;
+import org.xmlbeam.XBProjector;
+import org.xmlbeam.config.DefaultXMLFactoriesConfig;
+import org.xmlbeam.config.DefaultXMLFactoriesConfig.NamespacePhilosophy;
 
-import de.oppermann.pomutils.util.POM;
+import de.oppermann.pomutils.model.PomModel;
 
 /**
  * 
@@ -33,21 +35,28 @@ import de.oppermann.pomutils.util.POM;
 
 public class PomVersionReplacer {
 
-	private final String pomFileAsString;
+	private final String pomFile;
+	private final XBProjector xbProjector;
 
-	public PomVersionReplacer(String pomFileAsString) {
-		this.pomFileAsString = pomFileAsString;
+	public PomVersionReplacer(String pomFile) {
+		this.pomFile = pomFile;
+		xbProjector = new XBProjector();
+		xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
 	}
 
 	public void setVersionTo(String newVersion) {
 		try {
-			POM pomFile = new POM(pomFileAsString);
-			pomFile.setParentVersion(newVersion);
-			pomFile.setProjectVersion(newVersion);
-			pomFile.savePom();
+			PomModel pom = xbProjector.io().file(pomFile).read(PomModel.class);
+			if (pom.getParentArtifact() != null && pom.getParentArtifact().getVersion() != null) {
+				pom.getParentArtifact().setVersion(newVersion);
+			}
+			if (pom.getProjectArtifact().getVersion() != null) {
+				pom.getProjectArtifact().setVersion(newVersion);
+			}
+
+			// TODO: check obs nötig ist
+			xbProjector.io().file(pomFile).write(pom);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (XMLStreamException e) {
 			throw new RuntimeException(e);
 		}
 	}

@@ -27,8 +27,9 @@ import javax.xml.stream.XMLStreamException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
+import org.xmlbeam.XBProjector;
 
-import de.oppermann.pomutils.util.POM;
+import de.oppermann.pomutils.model.PomModel;
 
 /**
  * 
@@ -38,6 +39,8 @@ import de.oppermann.pomutils.util.POM;
 
 public class VersionReplaceTest extends TestCase {
 
+	private XBProjector xbProjector;
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -46,13 +49,15 @@ public class VersionReplaceTest extends TestCase {
 		File testTargetResourceFolder = new File("target/testresources/versionReplacer");
 		FileUtils.deleteDirectory(testTargetResourceFolder);
 		FileUtils.copyDirectory(new File("src/test/resources/versionReplacer"), testTargetResourceFolder);
+
+		xbProjector = TestUtils.createXBProjector();
 	}
 
-	private POM adjustPomToVersion(String pomToAdjust, String newVersion) throws IOException, XMLStreamException {
+	private PomModel adjustPomToVersion(String pomToAdjust, String newVersion) throws IOException, XMLStreamException {
 		PomVersionReplacer pomVersionReplacer = new PomVersionReplacer(pomToAdjust);
 		pomVersionReplacer.setVersionTo(newVersion);
 
-		return new POM(pomToAdjust);
+		return xbProjector.io().file(pomToAdjust).read(PomModel.class);
 	}
 
 	public void testParentAndProjectVersionChange() throws Exception {
@@ -60,10 +65,11 @@ public class VersionReplaceTest extends TestCase {
 		TestUtils.prepareTestFolder(myTestSubFolder);
 
 		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
+		PomModel resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml",
+		        newVersion);
 
-		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentVersion()));
-		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectVersion()));
+		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentArtifact().getVersion()));
+		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectArtifact().getVersion()));
 	}
 
 	public void testParentVersionChange() throws Exception {
@@ -71,10 +77,11 @@ public class VersionReplaceTest extends TestCase {
 		TestUtils.prepareTestFolder(myTestSubFolder);
 
 		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
+		PomModel resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml",
+		        newVersion);
 
-		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentVersion()));
-		assertNull("project version exists", resultPom.getProjectVersion());
+		assertTrue("parent version update succeeded", newVersion.equals(resultPom.getParentArtifact().getVersion()));
+		assertNull("project version exists", resultPom.getProjectArtifact().getVersion());
 	}
 
 	public void testProjectVersionChange() throws Exception {
@@ -82,9 +89,10 @@ public class VersionReplaceTest extends TestCase {
 		TestUtils.prepareTestFolder(myTestSubFolder);
 
 		String newVersion = "5.0";
-		POM resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml", newVersion);
+		PomModel resultPom = adjustPomToVersion(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/pom.xml",
+		        newVersion);
 
-		assertNull("parent version exists", resultPom.getParentVersion());
-		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectVersion()));
+		assertNull("parent version exists", resultPom.getParentArtifact());
+		assertTrue("project version update succeeded", newVersion.equals(resultPom.getProjectArtifact().getVersion()));
 	}
 }
