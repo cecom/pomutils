@@ -130,8 +130,6 @@ Basically you define the rules which should be used by adding the implementation
 followed by the configuration. If you want to write your own rule, have a look at the implemented ones and perhaps send
 a pull request to merge it ;-)
 
-Currently im working on a third rule where version conflicts in dependencies can be resolved.
-
 After you wrote your ruleset configuration file, add it to your git project *somewhere* and change the `driver` entry in your `.git/config`, e.g.:
 
 ```
@@ -145,3 +143,16 @@ After you wrote your ruleset configuration file, add it to your git project *som
 This command is used to set the parent/project version of a single pom.xml file. The version-maven-plugin always adjust the child's too, sometimes you don't want that.
 
 `java -jar <pathToJar>/pomutils-X.X.jar replace --pom=<pathToPomFile> --version=<newVersion>`
+
+
+HINTS
+------------
+In my project's I ship the pomutils.jar within the project. My .git/config entry looks like:
+
+```
+[merge "pom"]
+     driver = java -jar ./buildmgr/pomutils.jar merge --base=%O --our=%A --their=%B --ruleset=./buildmgr/ruleset
+```
+
+Now all developers can use the merge driver without downloading first the jar. They only have to add the .git/config entry.
+
