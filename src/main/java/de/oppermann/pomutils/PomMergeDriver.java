@@ -55,6 +55,9 @@ public class PomMergeDriver {
 
 	public int merge() {
 		try {
+			logger.debug("Doing merge [our={}] [base={}] [their={}]", ourPomFile,
+			        basePomFile, theirPomFile);
+
 			POM basePom = new POM(basePomFile);
 			POM ourPom = new POM(ourPomFile);
 			POM theirPom = new POM(theirPomFile);
@@ -74,7 +77,8 @@ public class PomMergeDriver {
 	}
 
 	private int doGitMerge() {
-		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L", "theirs",
+		ProcessBuilder processBuilder = new ProcessBuilder("git", "merge-file", "-L", "ours", "-L", "base", "-L",
+		        "theirs",
 		        ourPomFile, basePomFile, theirPomFile);
 		processBuilder.redirectErrorStream(true);
 		try {
