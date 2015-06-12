@@ -27,11 +27,10 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlbeam.XBProjector;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig.NamespacePhilosophy;
 
 import de.oppermann.pomutils.model.PomModel;
 import de.oppermann.pomutils.rules.Ruleset;
+import de.oppermann.pomutils.util.SaxonXPathFactoriesConfig;
 
 /**
  * 
@@ -55,8 +54,7 @@ public class PomMergeDriver {
 		this.ourPomFile = new File(ourPom);
 		this.theirPomFile = new File(theirPom);
 
-		xbProjector = new XBProjector();
-		xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
+		xbProjector = new XBProjector(new SaxonXPathFactoriesConfig());
 	}
 
 	public int merge() {
@@ -77,7 +75,7 @@ public class PomMergeDriver {
 			ruleset.evaluate(basePom, ourPom, theirPom);
 
 			// TODO: check obs nötig ist
-			// xbProjector.io().file(basePomFile).write(basePom);
+			xbProjector.io().file(basePomFile).write(basePom);
 			xbProjector.io().file(ourPomFile).write(ourPom);
 			xbProjector.io().file(theirPomFile).write(theirPom);
 

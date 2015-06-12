@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.xmlbeam.XBProjector;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig.NamespacePhilosophy;
+
+import de.oppermann.pomutils.util.SaxonXPathFactoriesConfig;
 
 /**
  * 
@@ -44,8 +44,9 @@ public class TestUtils {
 	}
 
 	public static XBProjector createXBProjector() {
-		XBProjector xbProjector = new XBProjector();
-		xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
+		XBProjector xbProjector = new XBProjector(new SaxonXPathFactoriesConfig());
+
+		// xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
 
 		return xbProjector;
 	}

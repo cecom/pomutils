@@ -33,41 +33,41 @@ import org.xmlbeam.annotation.XBWrite;
 
 public interface PomModel {
 
-	@XBRead("/project/name")
+	@XBRead("/m:project/m:name")
 	String getName();
 
-	@XBRead("/project")
+	@XBRead("/m:project")
 	Artifact getProjectArtifact();
 
-	@XBRead("/project/parent")
+	@XBRead("/m:project/m:parent")
 	Artifact getParentArtifact();
 
-	@XBRead("/project/profiles/profile")
+	@XBRead("/m:project/m:profiles/m:profile")
 	List<Profile> getProfiles();
 
-	@XBRead("/project/profiles/profile[id='{0}']")
+	@XBRead("/m:project/m:profiles/m:profile[m:id='{0}']")
 	Profile getProfile(String id);
 
-	@XBRead("/project/properties/{0}")
+	@XBRead("/m:project/m:properties/m:{0}")
 	String getPropertyValue(String property);
 
-	@XBRead("boolean(/project/properties/{0})")
+	@XBRead("boolean(/m:project/m:properties/m:{0})")
 	Boolean propertyExist(String property);
 
 	@XBWrite("/project/properties/{0}")
 	void setPropertyValue(String property, @XBValue String value);
 
-	@XBRead("/project/dependencies/dependency")
+	@XBRead("/m:project/m:dependencies/m:dependency")
 	List<Artifact> getDependencies();
 
 	public interface Artifact {
-		@XBRead("./groupId")
+		@XBRead("./m:groupId")
 		String getGroupId();
 
-		@XBRead("./artifactId")
+		@XBRead("./m:artifactId")
 		String getArtifactId();
 
-		@XBRead("./version")
+		@XBRead("./m:version")
 		String getVersion();
 
 		@XBWrite("./version")
@@ -75,13 +75,13 @@ public interface PomModel {
 	}
 
 	public interface Profile {
-		@XBRead("./id")
+		@XBRead("./m:id")
 		String getId();
 
-		@XBRead("./properties/{0}")
+		@XBRead("./m:properties/m:{0}")
 		String getPropertyValue(String property);
 
-		@XBRead("boolean(./properties/{0})")
+		@XBRead("boolean(./m:properties/m:{0})")
 		Boolean propertyExist(String property);
 
 		@XBWrite("./properties/{0}")

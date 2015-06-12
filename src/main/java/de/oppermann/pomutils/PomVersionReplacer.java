@@ -22,10 +22,9 @@ package de.oppermann.pomutils;
 import java.io.IOException;
 
 import org.xmlbeam.XBProjector;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig;
-import org.xmlbeam.config.DefaultXMLFactoriesConfig.NamespacePhilosophy;
 
 import de.oppermann.pomutils.model.PomModel;
+import de.oppermann.pomutils.util.SaxonXPathFactoriesConfig;
 
 /**
  * 
@@ -40,8 +39,7 @@ public class PomVersionReplacer {
 
 	public PomVersionReplacer(String pomFile) {
 		this.pomFile = pomFile;
-		xbProjector = new XBProjector();
-		xbProjector.config().as(DefaultXMLFactoriesConfig.class).setNamespacePhilosophy(NamespacePhilosophy.NIHILISTIC);
+		xbProjector = new XBProjector(new SaxonXPathFactoriesConfig());
 	}
 
 	public void setVersionTo(String newVersion) {
