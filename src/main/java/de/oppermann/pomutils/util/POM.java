@@ -45,7 +45,7 @@ import com.ctc.wstx.stax.WstxInputFactory;
  * 
  * @author Sven Oppermann <sven.oppermann@gmail.com>
  * 
- *		 this class is a wrapper class to the version-maven-plugin
+ *         this class is a wrapper class to the version-maven-plugin
  * 
  */
 public class POM {
@@ -77,7 +77,7 @@ public class POM {
 	}
 
 	private static XMLInputFactory initializeXmlInputFactory()
-			throws FactoryConfigurationError {
+	        throws FactoryConfigurationError {
 		XMLInputFactory inputFactory = new WstxInputFactory();
 		inputFactory.setProperty(XMLInputFactory2.P_PRESERVE_LOCATION, Boolean.TRUE);
 		return inputFactory;
@@ -90,8 +90,8 @@ public class POM {
 		projectIdentifier = calculateProjectIdentifier();
 		projectVersion = rawModel.getVersion();
 		parentVersion = rawModel.getParent() != null
-				? rawModel.getParent().getVersion()
-				: null;
+		        ? rawModel.getParent().getVersion()
+		        : null;
 	}
 
 	private String calculateProjectIdentifier() {
@@ -283,8 +283,8 @@ public class POM {
 
 		} else {
 			logger.debug("Adjusting property [{}] from [{}] to [{}] of profile [{}] of [{}]", property, getProperties().getProperty(property),
-					newPropertyValue,
-					profileId, getPath());
+			        newPropertyValue,
+			        profileId, getPath());
 		}
 		boolean propertyChanged = PomHelper.setPropertyVersion(pom, profileId, property, newPropertyValue);
 		if (propertyChanged) {
