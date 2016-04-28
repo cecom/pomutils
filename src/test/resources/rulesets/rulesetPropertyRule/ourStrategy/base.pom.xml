@@ -24,6 +24,12 @@
                 <jdbc.base.url></jdbc.base.url>
             </properties>
         </profile>
+        <profile>
+            <id>regex</id>
+            <properties>
+                <regex.version>base</regex.version>
+            </properties>
+        </profile>
     </profiles>
 
     <dependencies>

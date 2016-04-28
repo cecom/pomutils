@@ -104,6 +104,7 @@ public class RulesetTest extends TestCase {
 		String foobarPropertyExpectedResult = new POM(ourPomFile).getProperties().getProperty("foobar");
 		String foobarVersionPropertyExpectedResult = new POM(ourPomFile).getProperties().getProperty("foobar.version");
 		String jdbcBaseUrlExpectedResult = new POM(ourPomFile).getProperties().getProperty("jdbc.base.url");
+		String regexVersionPropertyExpectedResult = new POM(ourPomFile).getProfileProperties("regex").getProperty("regex.version");
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
@@ -127,6 +128,8 @@ public class RulesetTest extends TestCase {
 		        .getProperty("jdbc.base.url"));
 		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery")
 		        .getProperty("jdbc.base.url"));
+		assertEquals("our version of <regex.version> in profile <regex> should win", regexVersionPropertyExpectedResult, ourPom.getProfileProperties("regex")
+				.getProperty("regex.version"));
 	}
 
 	public void testPropertyRuleWithTheirStrategy() throws Exception {
@@ -142,6 +145,7 @@ public class RulesetTest extends TestCase {
 		String foobarPropertyExpectedResult = new POM(theirPomFile).getProperties().getProperty("foobar");
 		String foobarVersionPropertyExpectedResult = new POM(theirPomFile).getProperties().getProperty("foobar.version");
 		String jdbcBaseUrlExpectedResult = new POM(theirPomFile).getProperties().getProperty("jdbc.base.url");
+		String regexVersionPropertyExpectedResult = new POM(theirPomFile).getProfileProperties("regex").getProperty("regex.version");
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
 		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
@@ -165,6 +169,8 @@ public class RulesetTest extends TestCase {
 		        .getProperty("jdbc.base.url"));
 		assertEquals("<jdbc.base.url> of profile <delivery> should be empty", "", ourPom.getProfileProperties("delivery")
 		        .getProperty("jdbc.base.url"));
+		assertEquals("their version of <regex.version> in profile <regex> should win", regexVersionPropertyExpectedResult, ourPom.getProfileProperties("regex")
+				.getProperty("regex.version"));
 	}
 
 }
