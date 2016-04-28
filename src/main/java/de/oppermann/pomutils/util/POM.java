@@ -21,8 +21,10 @@ package de.oppermann.pomutils.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -224,6 +226,16 @@ public class POM {
 
 	public Properties getProperties() {
 		return getRawModel().getProperties();
+	}
+
+	public List<String> getMatchingProperties(Pattern regex) {
+		List<String> matchingProperties = new ArrayList<String>();
+		for (String property : getRawModel().getProperties().stringPropertyNames()) {
+			if (regex.matcher(property).matches()) {
+				matchingProperties.add(property);
+			}
+		}
+		return matchingProperties;
 	}
 
 	public void setPropertyToValue(String property, String newPropertyValue) throws XMLStreamException, IOException {

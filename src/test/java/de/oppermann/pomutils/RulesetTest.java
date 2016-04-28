@@ -102,6 +102,7 @@ public class RulesetTest extends TestCase {
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
 		String foobarPropertyExpectedResult = new POM(ourPomFile).getProperties().getProperty("foobar");
+		String foobarVersionPropertyExpectedResult = new POM(ourPomFile).getProperties().getProperty("foobar.version");
 		String jdbcBaseUrlExpectedResult = new POM(ourPomFile).getProperties().getProperty("jdbc.base.url");
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
@@ -116,6 +117,7 @@ public class RulesetTest extends TestCase {
 		assertEquals("<jdbc.base.url> property same content now", ourPom.getProperties().getProperty("jdbc.base.url"),
 		        theirPom.getProperties().getProperty("jdbc.base.url"));
 		assertEquals("our version of <foobar> should win", foobarPropertyExpectedResult, ourPom.getProperties().getProperty("foobar"));
+		assertEquals("our version of <foobar.version> should win", foobarVersionPropertyExpectedResult, ourPom.getProperties().getProperty("foobar.version"));
 		assertEquals("our version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult, ourPom.getProperties().getProperty("jdbc.base.url"));
 
 		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfileProperties("develop").getProperty("foobar"));
@@ -138,6 +140,7 @@ public class RulesetTest extends TestCase {
 		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
 
 		String foobarPropertyExpectedResult = new POM(theirPomFile).getProperties().getProperty("foobar");
+		String foobarVersionPropertyExpectedResult = new POM(theirPomFile).getProperties().getProperty("foobar.version");
 		String jdbcBaseUrlExpectedResult = new POM(theirPomFile).getProperties().getProperty("jdbc.base.url");
 		Ruleset ruleset = new Ruleset(rulesetFile);
 
@@ -152,6 +155,7 @@ public class RulesetTest extends TestCase {
 		assertEquals("<jdbc.base.url> property same content now",
 		        theirPom.getProperties().getProperty("jdbc.base.url"), ourPom.getProperties().getProperty("jdbc.base.url"));
 		assertEquals("their version of <foobar> should win", foobarPropertyExpectedResult, ourPom.getProperties().getProperty("foobar"));
+		assertEquals("their version of <foobar.version> should win", foobarVersionPropertyExpectedResult, ourPom.getProperties().getProperty("foobar.version"));
 		assertEquals("their version of <jdbc.base.url> should win", jdbcBaseUrlExpectedResult, ourPom.getProperties().getProperty("jdbc.base.url"));
 
 		assertNull("property <foobar> in profile <develop> should not exist", ourPom.getProfileProperties("develop").getProperty("foobar"));

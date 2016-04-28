@@ -21,6 +21,8 @@ package de.oppermann.pomutils.rules;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -43,6 +45,8 @@ public class PropertyRule extends AbstractRule {
 
 	private List<String> properties;
 
+	private List<String> propertiesRegex;
+
 	public PropertyRule() {
 		// for creating this instance via snakeyaml
 	}
@@ -61,30 +65,65 @@ public class PropertyRule extends AbstractRule {
 		this.properties = properties;
 	}
 
+	public List<String> getPropertiesRegex() {
+		return propertiesRegex;
+	}
+
+	public void setPropertiesRegex(List<String> propertiesRegex) {
+		this.propertiesRegex = propertiesRegex;
+	}
+
 	@Override
 	public void evaluate(POM basePom, POM ourPom, POM theirPom) throws IOException, XMLStreamException {
-		for (String property : getProperties()) {
-			logger.debug("Process property [{}]", property);
+		POM adjustPom;
+		POM withValueOfPom;
 
-			POM adjustPom = null;
-			POM withValueOfPom = null;
-			switch (getStrategy()) {
-				case OUR:
-					adjustPom = theirPom;
-					withValueOfPom = ourPom;
-					break;
-				case THEIR:
-					adjustPom = ourPom;
-					withValueOfPom = theirPom;
-					break;
-				default:
-					throw new IllegalArgumentException("Strategy [" + getStrategy().toString() + "] not implemented.");
+		switch (getStrategy()) {
+			case OUR:
+				adjustPom = theirPom;
+				withValueOfPom = ourPom;
+				break;
+			case THEIR:
+				adjustPom = ourPom;
+				withValueOfPom = theirPom;
+				break;
+			default:
+				throw new IllegalArgumentException("Strategy [" + getStrategy().toString() + "] not implemented.");
+		}
+
+		if (getProperties() != null) {
+			for (String property : getProperties()) {
+				logger.debug("Process property [{}]", property);
+				resolvePropertyValue(property, adjustPom, withValueOfPom);
 			}
+		}
 
-			adjustPom.setPropertyToValue(property, withValueOfPom.getProperties().getProperty(property));
-			for (Profile profile : adjustPom.getProfiles()) {
-				adjustPom.setPropertyToValue(profile.getId(), property, withValueOfPom.getProfileProperty(profile.getId(), property));
+		if (getPropertiesRegex() != null) {
+			for (String propertyRegex : getPropertiesRegex()) {
+				logger.debug("Process property regex [{}]", propertyRegex);
+				Pattern regex = compilePropertyRegex(propertyRegex);
+				for (String property : adjustPom.getMatchingProperties(regex)) {
+					resolvePropertyValue(property, adjustPom, withValueOfPom);
+				}
 			}
 		}
 	}
+
+	private void resolvePropertyValue(String property, POM adjustPom, POM withValueOfPom) throws XMLStreamException, IOException {
+		adjustPom.setPropertyToValue(property, withValueOfPom.getProperties().getProperty(property));
+		for (Profile profile : adjustPom.getProfiles()) {
+            adjustPom.setPropertyToValue(profile.getId(), property, withValueOfPom.getProfileProperty(profile.getId(), property));
+        }
+	}
+
+	private Pattern compilePropertyRegex(String propertyRegex) {
+		Pattern regex;
+		try {
+            regex = Pattern.compile(propertyRegex);
+        } catch (PatternSyntaxException e) {
+            throw new IllegalArgumentException("Invalid regex expression for property regex [" + propertyRegex + "] ");
+        }
+		return regex;
+	}
+
 }

@@ -6,6 +6,7 @@
 
     <properties>
         <foobar>our</foobar>
+        <foobar.version>our</foobar.version>
         <jdbc.base.url>our</jdbc.base.url>
     </properties>
 
