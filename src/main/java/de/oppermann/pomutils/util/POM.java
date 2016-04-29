@@ -21,8 +21,10 @@ package de.oppermann.pomutils.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -224,6 +226,34 @@ public class POM {
 
 	public Properties getProperties() {
 		return getRawModel().getProperties();
+	}
+	
+	public List<String> getMatchingProperties(Pattern regex) {
+		List<String> propertyNames = new ArrayList<String>();
+		propertyNames.addAll(getGlobalPropertyNames());
+		propertyNames.addAll(getProfilesPropertyNames());
+
+		List<String> matchingProperties = new ArrayList<String>();
+		for (String propertyName : propertyNames) {
+			if (regex.matcher(propertyName).matches()) {
+				matchingProperties.add(propertyName);
+			}
+		}
+		return matchingProperties;
+	}
+
+	private List<String> getGlobalPropertyNames() {
+		List<String> propertyNames = new ArrayList<String>();
+		propertyNames.addAll(getProperties().stringPropertyNames());
+		return propertyNames;
+	}
+
+	private List<String> getProfilesPropertyNames() {
+		List<String> propertyNames = new ArrayList<String>();
+		for (Profile profile : getProfiles()) {
+			propertyNames.addAll(getProfileProperties(profile.getId()).stringPropertyNames());
+		}
+		return propertyNames;
 	}
 
 	public void setPropertyToValue(String property, String newPropertyValue) throws XMLStreamException, IOException {

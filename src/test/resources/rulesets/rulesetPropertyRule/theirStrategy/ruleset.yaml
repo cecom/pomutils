@@ -6,3 +6,5 @@
     properties:                          # a list of property names
        - foobar
        - jdbc.base.url
+    propertiesRegex:                     # a list of property name regexes
+       - .+\.version

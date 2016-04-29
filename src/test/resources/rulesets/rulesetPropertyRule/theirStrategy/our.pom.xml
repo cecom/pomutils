@@ -6,6 +6,7 @@
 
     <properties>
         <foobar>our</foobar>
+        <foobar.version>our</foobar.version>
         <jdbc.base.url>our</jdbc.base.url>
     </properties>
 
@@ -21,6 +22,12 @@
             <properties>
                 <foobar />
                 <jdbc.base.url></jdbc.base.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>regex</id>
+            <properties>
+                <regex.version>our</regex.version>
             </properties>
         </profile>
     </profiles>

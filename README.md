@@ -125,6 +125,8 @@ to evaluate your own rule, you have to create a ruleset configuration file. This
     properties:                       # resolves the two given properties in the global and profile property section, using the *OUR* strategy
          - jdbc.user.name
          - foobar.version
+    propertiesRegex:                  # resolves properties in the global and profile property section matching regex expression, using the *OUR* strategy
+         - .+\.version
 
 Basically you define the rules which should be used by adding the implementation class of the rule with *--- !!*,
 followed by the configuration. If you want to write your own rule, have a look at the implemented ones and perhaps send
