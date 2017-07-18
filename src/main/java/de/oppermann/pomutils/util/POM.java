@@ -73,6 +73,18 @@ public class POM {
 			throw new IllegalArgumentException("File [" + pomFile.getAbsolutePath() + "] not found.");
 		}
 
+		if (pomFile.length() == 0L) {
+			/*
+			 * If we use git merge --allow-unrelated-histories, the base pom file
+			 * can be empty, so it cannot be parsed
+			 */
+			rawModel = null;
+			projectIdentifier = null;
+			projectVersion = "";
+			parentVersion = "";
+			return;
+		}
+
 		initialize();
 	}
 
