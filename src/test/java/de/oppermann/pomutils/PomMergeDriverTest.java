@@ -209,4 +209,28 @@ public class PomMergeDriverTest extends TestCase {
 
 		assertEquals("same version now", ourProjectVersion, theirPom.getProjectVersion());
 	}
+	
+	public void testAutoMergeWithNoBaseCommit() throws Exception {
+		String myTestSubFolder = "merge/autoMergeSucceded_noConflict_their";
+
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		Ruleset ruleset = new Ruleset(SelectionStrategy.THEIR);
+
+		PomMergeDriver pomMergeDriver = new PomMergeDriver(ruleset, basePomFile, ourPomFile, theirPomFile);
+		int mergeReturnValue = pomMergeDriver.merge();
+
+		assertTrue("merge succeeded", mergeReturnValue == 0);
+
+		POM theirPom = new POM(theirPomFile);
+		POM ourPom = new POM(ourPomFile);
+
+		assertEquals("their", ourPom.getProjectVersion());
+		assertEquals("their", theirPom.getProjectVersion());
+	}
+
 }
