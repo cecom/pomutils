@@ -65,6 +65,7 @@ public class POM {
 	private String projectVersion;
 	private String parentVersion;
 	private String projectIdentifier;
+	private String scmTag;
 	private Model rawModel;
 
 	public POM(String pomFileAsString) throws IOException, XMLStreamException {
@@ -82,6 +83,7 @@ public class POM {
 			projectIdentifier = null;
 			projectVersion = "";
 			parentVersion = "";
+			scmTag = "";
 			return;
 		}
 
@@ -104,6 +106,9 @@ public class POM {
 		parentVersion = rawModel.getParent() != null
 		        ? rawModel.getParent().getVersion()
 		        : null;
+		scmTag = rawModel.getScm() != null
+				? rawModel.getScm().getTag()
+				: null;
 	}
 
 	private String calculateProjectIdentifier() {
@@ -162,6 +167,14 @@ public class POM {
 	}
 
 	/**
+	 *
+	 * @return the SCM tag or null if the SCM tag is unset
+	 */
+	public String getScmTag() {
+		return scmTag;
+	}
+
+	/**
 	 * Sets the parent version to the given one, if it exists
 	 * @param newVersion
 	 */
@@ -189,6 +202,20 @@ public class POM {
 	}
 
 	/**
+	 * Sets the SCM tag to the given one, if it exists
+	 * @param newScmTag
+	 */
+	public void setScmTag(String newScmTag) {
+		if (this.scmTag == null || this.scmTag.equals(newScmTag)) {
+			return;
+		}
+		logger.debug("Adjusting scm tag from [{}] to [{}] of [{}] for [{}]", this.scmTag, newScmTag, getPath(), this.projectIdentifier);
+		this.scmTag = newScmTag;
+		this.changed = true;
+
+	}
+
+	/**
 	 * Saves the pom, if it was changed.
 	 */
 	public void savePom() throws IOException, XMLStreamException {
@@ -202,6 +229,10 @@ public class POM {
 
 		if (this.parentVersion != null) {
 			changed |= PomHelper.setProjectParentVersion(pom, this.parentVersion);
+		}
+
+		if (this.scmTag != null) {
+			changed |= PomHelper.setProjectValue(pom, "/project/scm/tag", this.scmTag);
 		}
 
 		if (!changed) {
