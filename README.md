@@ -57,6 +57,11 @@ Usage: <main class> [options] [command] [command options]
           -r, --ruleset
              The ruleset to use when you merge poms. If you don't specify a ruleset,
              a default ruleset will be used. Default is ProjectAndParentVersionRule with our strategy.
+          -e, --expandtab
+             Replace all indentation tabs with the specified amount of spaces.
+             Note: this is just a subset of the git's -Xignore-all-space
+             functionality. Misalignment after the tab replacement will still result in the
+             merge conflicts.
 
     replace      Updates the parent version and/or the project version in the given pom.xml
       Usage: replace [options]
