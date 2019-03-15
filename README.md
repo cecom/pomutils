@@ -107,11 +107,11 @@ then run the `git merge-file` command (which is used by the default merge driver
 *merge* Command *ADVANCED* Usage
 ------------
 
-It is also possible to write your own *Rule* for conflict resolution. Currently there are two
-implemented rules:
+It is also possible to write your own *Rule* for conflict resolution. Currently there are three implemented rules:
 
   - de.oppermann.pomutils.rules.ProjectAndParentVersionRule
   - de.oppermann.pomutils.rules.PropertyRule
+  - de.oppermann.pomutils.rules.ScmTagRule
 
 If you don't specify `--ruleset` on command line the *de.oppermann.pomutils.rules.ProjectAndParentVersionRule*
 rule is used. But if you want e.g. to resolve conflicts on maven properties too, or want
@@ -127,6 +127,10 @@ to evaluate your own rule, you have to create a ruleset configuration file. This
          - foobar.version
     propertiesRegex:                  # resolves properties in the global and profile property section matching regex expression, using the *OUR* strategy
          - .+\.version
+		 
+	--- !!de.oppermann.pomutils.rules.ScmTagRule
+    strategy: OUR                     # possible values: OUR|THEIR
+	                                  # resolves the  <scm><tag>...</tag></scm> element conflicts, using the *OUR* strategy
 
 Basically you define the rules which should be used by adding the implementation class of the rule with *--- !!*,
 followed by the configuration. If you want to write your own rule, have a look at the implemented ones and perhaps send
