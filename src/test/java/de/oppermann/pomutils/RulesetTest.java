@@ -173,4 +173,52 @@ public class RulesetTest extends TestCase {
 				.getProperty("regex.version"));
 	}
 
+	public void testScmTagWithOurStrategy() throws Exception {
+		String myTestSubFolder = "rulesets/rulesetScmTag/ourStrategy";
+
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		File rulesetFile = new File(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/ruleset.yaml");
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		String scmTagBeforeMerge = new POM(ourPomFile).getScmTag();
+		Ruleset ruleset = new Ruleset(rulesetFile);
+
+		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
+
+		assertTrue("merge succeeded", mergeReturnValue == 0);
+
+		POM theirPom = new POM(theirPomFile);
+		POM ourPom = new POM(ourPomFile);
+
+		assertEquals("same version now", ourPom.getScmTag(), theirPom.getScmTag());
+		assertEquals("our version should win", scmTagBeforeMerge, ourPom.getScmTag());
+	}
+
+	public void testScmTagWithTheirsStrategy() throws Exception {
+		String myTestSubFolder = "rulesets/rulesetScmTag/theirStrategy";
+
+		TestUtils.prepareTestFolder(myTestSubFolder);
+
+		File rulesetFile = new File(TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/ruleset.yaml");
+		String basePomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/base.pom.xml";
+		String ourPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/our.pom.xml";
+		String theirPomFile = TestUtils.resourceBaseTestFolder + "/" + myTestSubFolder + "/their.pom.xml";
+
+		String scmTagBeforeMerge = new POM(theirPomFile).getScmTag();
+		Ruleset ruleset = new Ruleset(rulesetFile);
+
+		int mergeReturnValue = doMerge(ruleset, basePomFile, ourPomFile, theirPomFile);
+
+		assertTrue("merge succeeded", mergeReturnValue == 0);
+
+		POM theirPom = new POM(theirPomFile);
+		POM ourPom = new POM(ourPomFile);
+
+		assertEquals("same version now", ourPom.getScmTag(), theirPom.getScmTag());
+		assertEquals("their version should win", scmTagBeforeMerge, ourPom.getScmTag());
+	}
+
 }
