@@ -1,0 +1,33 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+        <encoder>
+            <pattern>%green(%d{HH:mm:ss.SSS}) [%30.30thread] [%mdc{request.id:-noRequestId}] %highlight(%-5level) %cyan(%40.40logger:%-4.4line) - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+        <file>/busdata/batch/tid_mod_cus/log/tid_mod_cus.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>/busdata/batch/tid_mod_cus/log/tid_mod_cus.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <maxFileSize>32MB</maxFileSize>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{ISO8601} %-5level [%10.10thread] [%mdc{request.id:-noRequestId}] %-50.50logger:%-4.4line - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="TRACE">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+    <logger name="com.zaxxer" level="INFO"/>
+    <logger name="io" level="INFO"/>
+    <logger name="org" level="WARN"/>
+</configuration>
