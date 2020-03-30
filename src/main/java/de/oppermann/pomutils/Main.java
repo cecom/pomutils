@@ -47,12 +47,13 @@ public class Main {
 		int resultValue = 0;
 		try {
 			resultValue = mainInternal(args);
+			logger.debug("Exiting with exit code {}", resultValue);
 		} catch (Exception e) {
 			System.err.println("We got an exception on merge: " + StringUtils.join(args, " "));
 			e.printStackTrace();
 			System.exit(1);
 		}
-		logger.debug("Exiting with exit code {}", resultValue);
+
 		System.exit(resultValue);
 	}
 
@@ -93,8 +94,7 @@ public class Main {
 
 	private static int executePomMergeDriver(CommandPomMergeDriver mergeCommand) {
 		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getRuleSet(), mergeCommand.getBasePom(),
-		        mergeCommand.getOurPom(),
-		        mergeCommand.getTheirPom());
+				mergeCommand.getOurPom(), mergeCommand.getTheirPom());
 		return pomMergeDriver.merge();
 	}
 
