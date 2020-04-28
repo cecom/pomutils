@@ -51,6 +51,9 @@ public class CommandPomMergeDriver {
 	@Parameter(names = { "-r", "--ruleset" }, description = "The ruleset to use when you merge poms. If you don't specify a ruleset, a default ruleset will be used. Default is ProjectAndParentVersionRule with our strategy.")
 	private File ruleSetfile;
 
+	@Parameter(names = { "-e", "--expandtab" }, description = "Replace all indentation tabs with the specified amount of spaces.  Note: this is just a subset of the git's -Xignore-all-space functionality. Misalignment after the tab replacement will still result in the merge conflicts.", arity = 1)
+	private Integer expandTabSpaceCount;
+	
 	public String getBasePom() {
 		return basePom;
 	}
@@ -78,4 +81,7 @@ public class CommandPomMergeDriver {
 		return new Ruleset(getRuleSetFile());
 	}
 
+	public Integer getExpandTabSpaceCount() {
+		return expandTabSpaceCount;
+	}
 }

@@ -93,6 +93,23 @@ public class Main {
 	}
 
 	private static int executePomMergeDriver(CommandPomMergeDriver mergeCommand) {
+		if (mergeCommand.getExpandTabSpaceCount() != null) {
+			int spaceCount = mergeCommand.getExpandTabSpaceCount().intValue();
+			if (mergeCommand.getOurPom() != null) {
+				TabExpander ourTabExpander = new TabExpander(mergeCommand.getOurPom(), spaceCount);
+				ourTabExpander.expand();
+			}
+
+			if (mergeCommand.getTheirPom() != null) {
+				TabExpander theirTabExpander = new TabExpander(mergeCommand.getTheirPom(), spaceCount);
+				theirTabExpander.expand();
+			}
+
+			if (mergeCommand.getBasePom() != null) {
+				TabExpander baseTabExpander = new TabExpander(mergeCommand.getBasePom(), spaceCount);
+				baseTabExpander.expand();
+			}
+		}
 		PomMergeDriver pomMergeDriver = new PomMergeDriver(mergeCommand.getRuleSet(), mergeCommand.getBasePom(),
 				mergeCommand.getOurPom(), mergeCommand.getTheirPom());
 		return pomMergeDriver.merge();
